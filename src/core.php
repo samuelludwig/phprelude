@@ -71,3 +71,23 @@ function get_random_element_from_array(array $a) {
 function lget_random_element_from_array(): Closure {
     return fn($x) => get_random_element_from_array($x);
 }
+
+function lfold($initial, callable $callback) {
+    return fn($x) => f\fold($x, $initial, $callback);
+}
+
+function to_int($x): int {
+    return intval($x);
+}
+
+function lto_int(): Closure {
+    return fn($x) => to_int($x);
+}
+
+function to_timestamp(int $x): string {
+    return date('Y-m-d H:i:s', $x);
+}
+
+function lto_timestamp(): Closure {
+    return fn($x) => to_timestamp($x);
+}
