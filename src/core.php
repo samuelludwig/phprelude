@@ -1,0 +1,73 @@
+<?php declare(strict_types=1); namespace prelude;
+require_once __DIR__ . '/../vendor/autoload.php';
+use \Siler\Functional as f;
+use Closure;
+
+function getenv_with_default(
+    string $environment_variable_name,
+    string $default_value
+): string {
+    $environment_variable_value = getenv($environment_variable_name);
+    if ($environment_variable_value === false) return $default_value;
+    return $environment_variable_value;
+}
+
+function split_array_into_pairs(array $x): array {
+    return array_chunk($x, 2);
+}
+
+function lsplit_array_into_pairs(): Closure {
+    return fn($x) => array_chunk($x, 2);
+}
+
+function ljson_decode(): Closure {
+    return fn($x) => json_decode($x, true);
+}
+
+function lfile_get_contents(): Closure {
+    return fn($x) => file_get_contents($x);
+}
+
+function json_file_to_array(string $file_location): array {
+    return f\pipe([
+        lfile_get_contents(),
+        ljson_decode()
+    ])($file_location);
+}
+
+function ltake_key(string $key): Closure {
+    return fn($x) => $x[$key];
+}
+
+/**
+ * Rotates array values to the left, does not preserve indicies or keys.
+ */
+function rotate_array(array $a): array {
+    return array_push($a, array_shift($a));
+}
+
+function lrotate_array(): Closure {
+    return fn($x) => rotate_array($x);
+}
+
+function define_constant_from_environment_variable(
+    string $environment_variable_name,
+    string $default_environment_variable_value
+): array {
+    $environment_variable_value =
+        getenv_with_default(
+            $environment_variable_name,
+            $default_environment_variable_value);
+
+    define($environment_variable_name, $environment_variable_value);
+
+    return [ ':ok', true ];
+}
+
+function get_random_element_from_array(array $a) {
+    return array_rand($a, 1);
+}
+
+function lget_random_element_from_array(): Closure {
+    return fn($x) => get_random_element_from_array($x);
+}
