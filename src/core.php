@@ -1,4 +1,4 @@
-<?php declare(strict_types=1); namespace prelude;
+<?php declare(strict_types=1); namespace core;
 require_once __DIR__ . '/../vendor/autoload.php';
 use \Siler\Functional as f;
 use Closure;
