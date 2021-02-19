@@ -1,4 +1,4 @@
-<?php declare(strict_types=1); namespace core;
+<?php declare(strict_types=1); namespace Core;
 require_once __DIR__ . '/../vendor/autoload.php';
 use \Siler\Functional as f;
 use Closure;
@@ -17,7 +17,7 @@ function split_array_into_pairs(array $x): array {
 }
 
 function lsplit_array_into_pairs(): Closure {
-    return fn($x) => array_chunk($x, 2);
+    return fn($x) => split_array_into_pairs($x);
 }
 
 function ljson_decode(): Closure {
@@ -43,7 +43,8 @@ function ltake_key(string $key): Closure {
  * Rotates array values to the left, does not preserve indicies or keys.
  */
 function rotate_array(array $a): array {
-    return array_push($a, array_shift($a));
+    array_push($a, array_shift($a));
+    return $a;
 }
 
 function lrotate_array(): Closure {
@@ -90,4 +91,44 @@ function to_timestamp(int $x): string {
 
 function lto_timestamp(): Closure {
     return fn($x) => to_timestamp($x);
+}
+
+function ltake_col($key): Closure {
+    return fn($x) => array_column($x, $key);
+}
+
+function to_float($x): float {
+    return floatval($x);
+}
+
+function lto_float(): Closure {
+    return fn($x) => to_float($x);
+}
+
+function lhead(): Closure {
+    return fn($x) => f\head($x);
+}
+
+function lmax(...$args): Closure {
+    return fn($x) => max(f\flatten([$x, $args]));
+}
+
+function lmin(...$args): Closure {
+    return fn($x) => min(f\flatten([$x, $args]));
+}
+
+function bound_val($x, $lower_bound, $upper_bound): Closure {
+    return f\pipe([
+        lmax($lower_bound),
+        lmin($upper_bound)
+    ])($x);
+}
+
+function lbound_val($lower_bound, $upper_bound): Closure {
+    fn($x) => bound_val($x, $lower_bound, $upper_bound);
+}
+
+function larray_keys($search_value = false, bool $strict = false): Closure {
+    if ($search_value) return fn($x) => array_keys($x, $search_value, $strict);
+    return fn($x) => array_keys($x);
 }
