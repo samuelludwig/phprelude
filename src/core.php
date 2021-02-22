@@ -133,9 +133,36 @@ function larray_keys($search_value = false, bool $strict = false): Closure {
     return fn($x) => array_keys($x);
 }
 
-/* bind_error : callable -> [string, any] -> any */
+/* bind_error :: callable -> [string, any] -> any */
 function bind_error(callable $f, array $maybe_tuple) {
     [ $status, $value ] = $maybe_tuple;
+
+    if (!is_string($status)) {
+        trigger_error(
+            __FUNCTION__
+            . ' expects the first value of $maybe_tuple to be a string; '
+            . gettype($status)
+            . ' given'
+            , E_PARSE);
+    }
+
+    $arg_count = count($maybe_tuple);
+    if ($arg_count !== 2) {
+        trigger_error(
+            __FUNCTION__
+            . ' expects $maybe_tuple to consist of only two values, a $status'
+            . ' string, and a value (or array of values); '
+            . $arg_count
+            . ' given'
+            , E_PARSE);
+    }
+
     if ($status === ':error') return $maybe_tuple;
     return $f($value);
 }
+
+/* lbind_error :: callable -> (callable -> [string, any] -> any) */
+function lbind_error(callable $f): Closure {
+    return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
+}
+
