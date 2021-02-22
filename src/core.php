@@ -132,3 +132,10 @@ function larray_keys($search_value = false, bool $strict = false): Closure {
     if ($search_value) return fn($x) => array_keys($x, $search_value, $strict);
     return fn($x) => array_keys($x);
 }
+
+/* bind_error : callable -> [string, any] -> any */
+function bind_error(callable $f, array $maybe_tuple) {
+    [ $status, $value ] = $maybe_tuple;
+    if ($status === ':error') return $maybe_tuple;
+    return $f($value);
+}
