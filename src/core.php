@@ -4,6 +4,10 @@ use \Siler\Functional as f;
 use Closure;
 
 /**
+ * Notes
+ * -----
+ * - f\filter vs array_filter: the former destroys keys, the latter does not.
+ *
  * Types
  * -----
  * any :: mixed
@@ -141,6 +145,10 @@ function larray_keys($search_value = false, bool $strict = false): Closure {
     return fn($x) => array_keys($x);
 }
 
+function larray_filter(callable $predicate): Closure {
+    return fn($x) => array_filter($x, $predicate);
+}
+
 /* bind_error :: callable -> [ status :: string, result :: any ] -> any */
 function bind_error(callable $f, array $maybe_tuple) {
     [ $status, $value ] = $maybe_tuple;
@@ -176,7 +184,7 @@ function lbind_error(callable $f): Closure {
 
 /* locate :: array -> predicate -> [ key, any ] */
 function locate(array $a, callable $predicate): array {
-    $filtered = f\filter($a, $predicate);
+    $filtered = array_filter($a, $predicate);
 
     $key = f\pipe([
         larray_keys(),
