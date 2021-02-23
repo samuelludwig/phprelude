@@ -183,7 +183,7 @@ function locate(array $a, callable $predicate): array {
         lhead()
     ])($filtered);
 
-    $value = head($filtered);
+    $value = f\head($filtered);
 
     return [ $key, $value ];
 }
