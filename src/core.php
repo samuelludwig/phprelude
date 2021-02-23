@@ -192,9 +192,3 @@ function locate(array $a, callable $predicate): array {
 function llocate(callable $predicate): array {
     return fn($x) => locate($x, $predicate);
 }
-
-/* TODO: Add the functionality for a search and strict value like in the std lib
- * function. */
-function larray_keys(): Closure {
-    return fn($x) => larray_keys($x);
-}
