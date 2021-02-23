@@ -3,6 +3,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use \Siler\Functional as f;
 use Closure;
 
+/**
+ * Types
+ * -----
+ * any :: mixed
+ * predicate :: callable
+ * key :: any
+ */
+
 function getenv_with_default(
     string $environment_variable_name,
     string $default_value
@@ -133,7 +141,7 @@ function larray_keys($search_value = false, bool $strict = false): Closure {
     return fn($x) => array_keys($x);
 }
 
-/* bind_error :: callable -> [string, any] -> any */
+/* bind_error :: callable -> [ status :: string, result :: any ] -> any */
 function bind_error(callable $f, array $maybe_tuple) {
     [ $status, $value ] = $maybe_tuple;
 
@@ -161,8 +169,32 @@ function bind_error(callable $f, array $maybe_tuple) {
     return $f($value);
 }
 
-/* lbind_error :: callable -> (callable -> [string, any] -> any) */
+/* lbind_error :: callable -> (callable -> [ status :: string, result :: any ] -> any) */
 function lbind_error(callable $f): Closure {
     return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
 }
 
+/* locate :: array -> predicate -> [ key, any ] */
+function locate(array $a, callable $predicate): array {
+    $filtered = f\filter($a, $predicate);
+
+    $key = f\pipe([
+        larray_keys(),
+        lhead()
+    ])($filtered);
+
+    $value = head($filtered);
+
+    return [ $key, $value ];
+}
+
+/* llocate :: predicate -> (array -> predicate -> [ key, any ]) */
+function llocate(callable $predicate): array {
+    return fn($x) => locate($x, $predicate);
+}
+
+/* TODO: Add the functionality for a search and strict value like in the std lib
+ * function. */
+function larray_keys(): Closure {
+    return fn($x) => larray_keys($x);
+}
