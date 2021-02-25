@@ -37,7 +37,7 @@ function ljson_decode(): Closure {
 }
 
 function ljson_encode($pretty_print = false): Closure {
-    $if ($pretty_print === true) return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
+    if ($pretty_print === true) return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
     return fn($x) => json_encode($x);
 }
 
