@@ -187,6 +187,17 @@ function lbind_error(callable $f): Closure {
     return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
 }
 
+function find_keys_where(array $a, callable $predicate): array {
+    return f\pipe([
+        larray_filter($predicate),
+        larray_keys()
+    ])($a);
+}
+
+function lfind_keys_where(callable $predicate): array {
+    return fn($x) => find_keys_where($x, $predicate);
+}
+
 /* locate :: array -> predicate -> [ key, any ] */
 function locate(array $a, callable $predicate): array {
     $filtered = array_filter($a, $predicate);
