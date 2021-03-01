@@ -194,7 +194,7 @@ function find_keys_where(array $a, callable $predicate): array {
     ])($a);
 }
 
-function lfind_keys_where(callable $predicate): array {
+function lfind_keys_where(callable $predicate): Closure {
     return fn($x) => find_keys_where($x, $predicate);
 }
 
