@@ -216,3 +216,66 @@ function locate(array $a, callable $predicate): array {
 function llocate(callable $predicate): array {
     return fn($x) => locate($x, $predicate);
 }
+
+/* extract_element_from_list_by_contained_key_value
+ * :: [assoc_array] -> string -> any -> assoc_array */
+function extract_element_from_list_by_contained_key_value(
+    array $list,
+    string $key_name,
+    $target_value
+): array {
+    $target_value_type = gettype($target_value);
+
+    $is_our_element
+    = function ($x) use ($key_name, $target_value, $target_value_type) {
+        $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
+        if (!$is_associative($x)) return [];
+        settype($x[$key_name], $target_value_type);
+        return $x[$key_name] === $target_value;
+    };
+
+    return f\pipe([
+        f\lfilter($is_our_element),
+        lhead()
+    ])($list);
+}
+
+function lextract_element_from_list_by_contained_key_value(
+    string $key_name,
+    $target_value
+): Closure {
+    return fn($x) => extract_element_from_list_by_contained_key_value;
+}
+
+function element_with_key_value_exists_in_list(
+    array $list,
+    string $key_name,
+    $target_value
+): bool {
+    $target_value_type = gettype($target_value);
+
+    $is_our_element
+    = function ($x) use ($key_name, $target_value, $target_value_type) {
+        $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
+        if (!$is_associative($x)) return [];
+        settype($x[$key_name], $target_value_type);
+        return $x[$key_name] === $target_value;
+    };
+
+    return f\pipe([
+        f\lfilter($is_our_element),
+        f\not(lempty())
+    ])($list);
+}
+
+function lelement_with_key_value_exists_in_list(
+    string $key_name,
+    $target_value
+): bool {
+    return fn($x) => element_with_key_value_exists_in_list($x, $key_name, $target_value);
+}
+
+function lempty(): bool {
+    return fn($x) => empty($x);
+}
+
