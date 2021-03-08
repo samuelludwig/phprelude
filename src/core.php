@@ -252,15 +252,8 @@ function element_with_key_value_exists_in_list(
     string $key_name,
     $target_value
 ): bool {
-    $target_value_type = gettype($target_value);
-
     $is_our_element
-    = function ($x) use ($key_name, $target_value, $target_value_type) {
-        $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
-        if (!$is_associative($x)) return [];
-        settype($x[$key_name], $target_value_type);
-        return $x[$key_name] === $target_value;
-    };
+        = llist_element_contains_key_value($key_name, $target_value);
 
     return f\pipe([
         f\lfilter($is_our_element),
@@ -275,7 +268,51 @@ function lelement_with_key_value_exists_in_list(
     return fn($x) => element_with_key_value_exists_in_list($x, $key_name, $target_value);
 }
 
+function get_first_index_where_element_contains_key_value(
+    array $list,
+    string $key_name,
+    $target_value
+) {
+    $is_our_element
+        = llist_element_contains_key_value($key_name, $target_value);
+
+    return f\pipe([
+        f\lfilter($is_our_element),
+        larray_keys(),
+        lhead()
+    ])($list);
+}
+
+function lget_first_index_where_element_contains_key_value(
+    string $key_name,
+    $target_value
+): Closure {
+    return
+        fn($x) => get_first_index_where_element_contains_key_value(
+                    $x,
+                    $key_name,
+                    $target_value);
+}
+
 function lempty(): bool {
     return fn($x) => empty($x);
+}
+
+function list_element_contains_key_value(
+    array $element,
+    string $key_name,
+    $target_value
+): bool {
+    $target_value_type = gettype($target_value);
+
+    $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
+    if (!$is_associative($element)) return [];
+
+    settype($element[$key_name], $target_value_type);
+    return $element[$key_name] === $target_value;
+}
+
+function llist_element_contains_key_value(string $key_name, $target_value): Closure {
+    return fn($x) => list_element_contains_key_value($x, $key_name, $target_value);
 }
 
