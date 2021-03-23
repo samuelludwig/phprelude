@@ -92,7 +92,7 @@ function lget_random_element_from_array(): Closure {
     return fn($x) => get_random_element_from_array($x);
 }
 
-function lfold($initial, callable $callback) {
+function lfold($initial, callable $callback): Closure {
     return fn($x) => f\fold($x, $initial, $callback);
 }
 
@@ -217,7 +217,7 @@ function locate(array $a, callable $predicate): array {
 
 /* llocate
  * :: predicate -> (array -> predicate -> { key : string|int, value :  any }) */
-function llocate(callable $predicate): array {
+function llocate(callable $predicate): Closure {
     return fn($x) => locate($x, $predicate);
 }
 
@@ -306,7 +306,7 @@ function lget_first_index_where_element_contains_key_value(
                     $target_value);
 }
 
-function lempty(): bool {
+function lempty(): Closure {
     return fn($x) => empty($x);
 }
 
