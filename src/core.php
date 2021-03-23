@@ -37,7 +37,9 @@ function ljson_decode(): Closure {
 }
 
 function ljson_encode($pretty_print = false): Closure {
-    if ($pretty_print === true) return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
+    if ($pretty_print === true)
+        return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
+
     return fn($x) => json_encode($x);
 }
 
@@ -154,7 +156,7 @@ function larray_filter(callable $predicate): Closure {
     return fn($x) => array_filter($x, $predicate);
 }
 
-/* bind_error :: callable -> [ status :: string, result :: any ] -> any */
+/* bind_error :: callable -> { status : string, result : any } -> any */
 function bind_error(callable $f, array $maybe_tuple) {
     [ $status, $value ] = $maybe_tuple;
 
@@ -182,7 +184,8 @@ function bind_error(callable $f, array $maybe_tuple) {
     return $f($value);
 }
 
-/* lbind_error :: callable -> (callable -> [ status :: string, result :: any ] -> any) */
+/* lbind_error
+ * :: callable -> (callable -> [ status :: string, result :: any ] -> any) */
 function lbind_error(callable $f): Closure {
     return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
 }
@@ -198,7 +201,7 @@ function lfind_keys_where(callable $predicate): Closure {
     return fn($x) => find_keys_where($x, $predicate);
 }
 
-/* locate :: array -> predicate -> [ key, any ] */
+/* locate :: array -> predicate -> { key : string|int, value :  any } */
 function locate(array $a, callable $predicate): array {
     $filtered = array_filter($a, $predicate);
 
@@ -212,13 +215,14 @@ function locate(array $a, callable $predicate): array {
     return [ $key, $value ];
 }
 
-/* llocate :: predicate -> (array -> predicate -> [ key, any ]) */
+/* llocate
+ * :: predicate -> (array -> predicate -> { key : string|int, value :  any }) */
 function llocate(callable $predicate): array {
     return fn($x) => locate($x, $predicate);
 }
 
 /* extract_element_from_list_by_contained_key_value
- * :: [assoc_array] -> string -> any -> assoc_array */
+ * :: List assoc -> string -> any -> assoc */
 function extract_element_from_list_by_contained_key_value(
     array $list,
     string $key_name,
@@ -227,17 +231,22 @@ function extract_element_from_list_by_contained_key_value(
     $target_value_type = gettype($target_value);
 
     $is_our_element
-    = function ($x) use ($key_name, $target_value, $target_value_type) {
-        $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
-        if (!$is_associative($x)) return [];
-        settype($x[$key_name], $target_value_type);
-        return $x[$key_name] === $target_value;
-    };
+        = function ($x) use ($key_name, $target_value, $target_value_type) {
+            $is_associative
+                = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
 
-    return f\pipe([
+            if (!$is_associative($x)) return [];
+            settype($x[$key_name], $target_value_type);
+            return $x[$key_name] === $target_value;
+        };
+
+    $element = f\pipe([
         f\lfilter($is_our_element),
         lhead()
     ])($list);
+
+    if ($element === null) return [];
+    return $element;
 }
 
 function lextract_element_from_list_by_contained_key_value(
@@ -265,7 +274,10 @@ function lelement_with_key_value_exists_in_list(
     string $key_name,
     $target_value
 ): bool {
-    return fn($x) => element_with_key_value_exists_in_list($x, $key_name, $target_value);
+    return fn($x) => element_with_key_value_exists_in_list(
+                        $x,
+                        $key_name,
+                        $target_value);
 }
 
 function get_first_index_where_element_contains_key_value(
@@ -298,6 +310,7 @@ function lempty(): bool {
     return fn($x) => empty($x);
 }
 
+/* list_element_contains_key_value :: array -> string -> any -> bool */
 function list_element_contains_key_value(
     array $element,
     string $key_name,
@@ -305,14 +318,34 @@ function list_element_contains_key_value(
 ): bool {
     $target_value_type = gettype($target_value);
 
-    $is_associative = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
+    $is_associative
+        = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
+
     if (!$is_associative($element)) return [];
 
     settype($element[$key_name], $target_value_type);
     return $element[$key_name] === $target_value;
 }
 
-function llist_element_contains_key_value(string $key_name, $target_value): Closure {
-    return fn($x) => list_element_contains_key_value($x, $key_name, $target_value);
+/* llist_element_contains_key_value
+ * :: string -> any -> (array -> string -> any -> bool) */
+function llist_element_contains_key_value(
+    string $key_name,
+    $target_value
+): Closure {
+    return
+        fn($x) => list_element_contains_key_value(
+                    $x,
+                    $key_name,
+                    $target_value);
 }
 
+/* is_null_unset_or_empty :: any -> bool */
+function is_null_unset_or_empty($x): bool {
+    return ($x === null || empty($x) || !isset($x));
+}
+
+/* lis_null_unset_or_empty :: () -> (any -> bool) */
+function lis_null_unset_or_empty(): Closure {
+    return fn($x) => is_null_unset_or_empty($x);
+}
