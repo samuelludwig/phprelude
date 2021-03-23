@@ -253,7 +253,10 @@ function lextract_element_from_list_by_contained_key_value(
     string $key_name,
     $target_value
 ): Closure {
-    return fn($x) => extract_element_from_list_by_contained_key_value;
+    return fn($x) => extract_element_from_list_by_contained_key_value(
+                        $x,
+                        $key_name,
+                        $target_value);
 }
 
 function element_with_key_value_exists_in_list(
