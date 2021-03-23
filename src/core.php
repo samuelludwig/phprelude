@@ -273,7 +273,7 @@ function element_with_key_value_exists_in_list(
 function lelement_with_key_value_exists_in_list(
     string $key_name,
     $target_value
-): bool {
+): Closure {
     return fn($x) => element_with_key_value_exists_in_list(
                         $x,
                         $key_name,
