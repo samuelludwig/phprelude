@@ -1,0 +1,1 @@
+C:37:"PHPUnit\Runner\DefaultTestResultCache":226:{a:2:{s:7:"defects";a:2:{s:20:"CoreTest::testLocate";i:3;s:45:"CoreTest::testElementWithKeyValueExistsInList";i:5;}s:5:"times";a:2:{s:20:"CoreTest::testLocate";d:0.002;s:45:"CoreTest::testElementWithKeyValueExistsInList";d:0;}}}

@@ -6,6 +6,9 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    '320cde22f66dd4f5d3fd621d3e88b98f' => $vendorDir . '/symfony/polyfill-ctype/bootstrap.php',
+    'ec07570ca5a812141189b1fa81503674' => $vendorDir . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
+    '6124b4c8570aa390c21fafd04a26c69f' => $vendorDir . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
     '2ef9ec853ecfc870470d66cc64167543' => $vendorDir . '/leocavalcante/siler/src/Config/Config.php',
     '625767ee32589091312b4f81c394cb8e' => $vendorDir . '/leocavalcante/siler/src/Container/Container.php',
     'a6763048ebd6f6db73908c9aeaf523c6' => $vendorDir . '/leocavalcante/siler/src/Diactoros/Diactoros.php',

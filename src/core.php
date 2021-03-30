@@ -58,6 +58,16 @@ function ltake_key(string $key): Closure {
     return fn($x) => $x[$key];
 }
 
+/* larray_diff :: array -> (array -> array) */
+function larray_diff(array $a): Closure {
+    return fn($x) => array_diff($x, $a);
+}
+
+/* larray_diffr :: array -> (array -> array) */
+function larray_diffr(array $a): Closure {
+    return fn($x) => array_diff($a, $x);
+}
+
 /**
  * Rotates array values to the left, does not preserve indicies or keys.
  */
