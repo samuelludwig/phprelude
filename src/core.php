@@ -54,7 +54,8 @@ function json_file_to_array(string $file_location): array {
     ])($file_location);
 }
 
-function ltake_key(string $key): Closure {
+/* ltake_key :: any -> (array -> any) */
+function ltake_key($key): Closure {
     return fn($x) => $x[$key];
 }
 
