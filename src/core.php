@@ -389,8 +389,8 @@ function print_out($x) {
 }
 
 /* lprint_out :: () -> (any -> any) */
-function lprint_out(): Closure {
-    return fn($x) => print_out($x);
+function lprint_out($x): Closure {
+    return fn() => print_out($x);
 }
 
 /* is_null_unset_or_empty :: any -> bool */
