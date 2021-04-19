@@ -354,6 +354,20 @@ function llist_element_contains_key_value(
                     $target_value);
 }
 
+/* larray_merge :: Variadic array -> (array -> array) */
+function larray_merge(...$a): Closure {
+    return fn($x) => array_merge($x, ...$a);
+}
+
+/* sum_array_key_values :: Variadic array -> array */
+function sum_array_key_values(...$arrays): array {
+    $res = array_merge_recursive(...$arrays);
+    foreach($res as $index => $x) {
+        if (is_array($x)) $res[$index] = array_sum($x);
+    }
+    return $res;
+}
+
 /* is_null_unset_or_empty :: any -> bool */
 function is_null_unset_or_empty($x): bool {
     return ($x === null || empty($x) || !isset($x));
