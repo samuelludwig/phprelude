@@ -362,10 +362,23 @@ function larray_merge(...$a): Closure {
 /* sum_array_key_values :: Variadic array -> array */
 function sum_array_key_values(...$arrays): array {
     $res = array_merge_recursive(...$arrays);
-    foreach($res as $index => $x) {
+
+    foreach($res as $index => $x)
         if (is_array($x)) $res[$index] = array_sum($x);
-    }
+
     return $res;
+}
+
+/* inspect :: any -> any
+ * -- impure: prints to stdout */
+function inspect($x) {
+    var_dump($x);
+    return $x;
+}
+
+/* linspect :: () -> (any -> any) */
+function linspect(): Closure {
+    return fn($x) => inspect($x);
 }
 
 /* is_null_unset_or_empty :: any -> bool */
