@@ -381,6 +381,18 @@ function linspect(): Closure {
     return fn($x) => inspect($x);
 }
 
+/* print_out :: any -> any
+ * -- impure: prints to stdout */
+function print_out($x) {
+    echo $x;
+    return $x;
+}
+
+/* lprint_out :: () -> (any -> any) */
+function lprint_out($x): Closure {
+    return fn($x) => print_out($x);
+}
+
 /* is_null_unset_or_empty :: any -> bool */
 function is_null_unset_or_empty($x): bool {
     return ($x === null || empty($x) || !isset($x));
