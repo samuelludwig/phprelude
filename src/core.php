@@ -383,14 +383,14 @@ function linspect(): Closure {
 
 /* print_out :: any -> any
  * -- impure: prints to stdout */
-function print_out($x) {
+function print_out($r, $x) {
     echo $x;
-    return $x;
+    return $r;
 }
 
 /* lprint_out :: () -> (any -> any) */
 function lprint_out($x): Closure {
-    return fn() => print_out($x);
+    return fn($r) => print_out($r, $x);
 }
 
 /* is_null_unset_or_empty :: any -> bool */
