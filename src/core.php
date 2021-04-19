@@ -389,7 +389,7 @@ function print_out($x) {
 }
 
 /* lprint_out :: () -> (any -> any) */
-function lprint_out($x): Closure {
+function lprint_out(): Closure {
     return fn($x) => print_out($x);
 }
 
