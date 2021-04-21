@@ -54,9 +54,15 @@ function json_file_to_array(string $file_location): array {
     ])($file_location);
 }
 
-/* ltake_key :: any -> (array -> any) */
-function ltake_key($key): Closure {
-    return fn($x) => $x[$key];
+/* take_key :: array -> any -> Optional any -> any */
+function take_key(array $a, $key, $default = null) {
+    if (isset($a[$key])) return $a[$key];
+    return $default;
+}
+
+/* ltake_key :: any -> Optional any -> (array -> any) */
+function ltake_key($key, $default = null): Closure {
+    return fn($x) => take_key($x, $key, $default);
 }
 
 /* larray_diff :: array -> (array -> array) */
