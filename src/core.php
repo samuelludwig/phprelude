@@ -12,9 +12,11 @@ use Closure;
  * -----
  * any :: mixed
  * predicate :: callable
- * key :: any
+ * key :: string|int
  */
 
+/* getenv_with_default :: string -> string -> string
+ * !impure: reads from environment */
 function getenv_with_default(
     string $environment_variable_name,
     string $default_value
@@ -24,18 +26,22 @@ function getenv_with_default(
     return $environment_variable_value;
 }
 
+/* split_array_into_pairs :: array -> array */
 function split_array_into_pairs(array $x): array {
     return array_chunk($x, 2);
 }
 
+/* lsplit_array_into_pairs :: () -> (array -> array) */
 function lsplit_array_into_pairs(): Closure {
     return fn($x) => split_array_into_pairs($x);
 }
 
+/* ljson_decode :: () -> (string -> array) */
 function ljson_decode(): Closure {
     return fn($x) => json_decode($x, true);
 }
 
+/* ljson_encode :: Optional bool -> (array -> string) */
 function ljson_encode($pretty_print = false): Closure {
     if ($pretty_print === true)
         return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
@@ -43,10 +49,12 @@ function ljson_encode($pretty_print = false): Closure {
     return fn($x) => json_encode($x);
 }
 
+/* lfile_get_contents :: () -> (string -> string|bool) */
 function lfile_get_contents(): Closure {
     return fn($x) => file_get_contents($x);
 }
 
+/* json_file_to_array :: string -> array */
 function json_file_to_array(string $file_location): array {
     return f\pipe([
         lfile_get_contents(),
@@ -54,13 +62,13 @@ function json_file_to_array(string $file_location): array {
     ])($file_location);
 }
 
-/* take_key :: array -> any -> Optional any -> any */
+/* take_key :: array -> key -> Optional any -> any */
 function take_key(array $a, $key, $default = null) {
     if (isset($a[$key])) return $a[$key];
     return $default;
 }
 
-/* ltake_key :: any -> Optional any -> (array -> any) */
+/* ltake_key :: key -> Optional any -> (array -> any) */
 function ltake_key($key, $default = null): Closure {
     return fn($x) => take_key($x, $key, $default);
 }
@@ -77,16 +85,21 @@ function larray_diffr(array $a): Closure {
 
 /**
  * Rotates array values to the left, does not preserve indicies or keys.
- */
+ *
+ * rotate_array :: array -> array */
 function rotate_array(array $a): array {
     array_push($a, array_shift($a));
     return $a;
 }
 
+/* lrotate_array :: () -> (array -> array) */
 function lrotate_array(): Closure {
     return fn($x) => rotate_array($x);
 }
 
+/* define_constant_from_environment_variable
+ * :: string -> string -> array
+ * !impure: reads from environment; creates a global constant */
 function define_constant_from_environment_variable(
     string $environment_variable_name,
     string $default_environment_variable_value
@@ -161,7 +174,7 @@ function bound_val($x, $lower_bound, $upper_bound): Closure {
 }
 
 function lbound_val($lower_bound, $upper_bound): Closure {
-    fn($x) => bound_val($x, $lower_bound, $upper_bound);
+    return fn($x) => bound_val($x, $lower_bound, $upper_bound);
 }
 
 function larray_keys($search_value = false, bool $strict = false): Closure {
@@ -239,7 +252,7 @@ function llocate(callable $predicate): Closure {
 }
 
 /* extract_element_from_list_by_contained_key_value
- * :: List assoc -> string -> any -> assoc */
+ * :: array -> string -> any -> assoc */
 function extract_element_from_list_by_contained_key_value(
     array $list,
     string $key_name,
@@ -266,6 +279,8 @@ function extract_element_from_list_by_contained_key_value(
     return $element;
 }
 
+/* lextract_element_from_list_by_contained_key_value
+ * :: string -> any -> (array -> array) */
 function lextract_element_from_list_by_contained_key_value(
     string $key_name,
     $target_value
@@ -276,6 +291,8 @@ function lextract_element_from_list_by_contained_key_value(
                         $target_value);
 }
 
+/* element_with_key_value_exists_in_list
+ * :: array -> string -> any -> bool */
 function element_with_key_value_exists_in_list(
     array $list,
     string $key_name,
@@ -290,6 +307,8 @@ function element_with_key_value_exists_in_list(
     ])($list);
 }
 
+/* lelement_with_key_value_exists_in_list
+ * :: string -> any -> (array -> bool) */
 function lelement_with_key_value_exists_in_list(
     string $key_name,
     $target_value
@@ -300,6 +319,8 @@ function lelement_with_key_value_exists_in_list(
                         $target_value);
 }
 
+/* get_first_index_where_element_contains_key_value
+ * :: array -> string -> any -> int */
 function get_first_index_where_element_contains_key_value(
     array $list,
     string $key_name,
@@ -315,6 +336,8 @@ function get_first_index_where_element_contains_key_value(
     ])($list);
 }
 
+/* lget_first_index_where_element_contains_key_value
+ * :: string -> any -> (array -> int) */
 function lget_first_index_where_element_contains_key_value(
     string $key_name,
     $target_value
@@ -326,6 +349,7 @@ function lget_first_index_where_element_contains_key_value(
                     $target_value);
 }
 
+/* lempty :: () -> (any -> bool) */
 function lempty(): Closure {
     return fn($x) => empty($x);
 }
@@ -376,7 +400,7 @@ function sum_array_key_values(...$arrays): array {
 }
 
 /* inspect :: any -> any
- * -- impure: prints to stdout */
+ * !impure: prints to stdout */
 function inspect($x) {
     var_dump($x);
     return $x;
@@ -388,7 +412,7 @@ function linspect(): Closure {
 }
 
 /* print_out :: any -> any
- * -- impure: prints to stdout */
+ * !impure: prints to stdout */
 function print_out($r, $x) {
     echo $x;
     return $r;
@@ -407,4 +431,29 @@ function is_null_unset_or_empty($x): bool {
 /* lis_null_unset_or_empty :: () -> (any -> bool) */
 function lis_null_unset_or_empty(): Closure {
     return fn($x) => is_null_unset_or_empty($x);
+}
+
+/* update_key_val :: array -> key -> callable/1 -> array */
+function update_key_val(array $a, $key, callable $f): array {
+    $old_val = $a[$key];
+    $a[$key] = $f($old_val);
+    return $a;
+}
+
+/* lupdate_key_val :: key -> callable/1 -> (array -> array) */
+function lupdate_key_val($key, callable $f): Closure {
+    return fn($a) => update_key_val($a, $key, $f);
+}
+
+/* update_nested_key_val :: array -> array -> callable/1 -> array */
+function update_nested_key_val(array $a, array $keys, callable $f): array {
+    if (count($keys) === 0) return $f($a);
+    [$first_key, $rest_of_keys] = f\uncons($keys);
+    $f_prime = lupdate_nested_key_val($rest_of_keys, $f);
+    return update_key_val($a, $first_key, $f_prime);
+}
+
+/* lupdate_nested_key_val :: array -> callable/1 -> (array -> array) */
+function lupdate_nested_key_val(array $keys, callable $f): Closure {
+    return fn($a) => update_nested_key_val($a, $keys, $f);
 }
