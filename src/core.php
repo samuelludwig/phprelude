@@ -134,6 +134,23 @@ function lto_int(): Closure {
     return fn($x) => to_int($x);
 }
 
+/* to_float :: string|int|float -> float */
+function to_float($x): float {
+    return floatval($x);
+}
+
+function lto_float(): Closure {
+    return fn($x) => to_float($x);
+}
+
+function to_string($x): string {
+    return "$x";
+}
+
+function lto_string(): Closure {
+    return fn($x) => to_string($x);
+}
+
 function to_timestamp(int $x): string {
     return date('Y-m-d H:i:s', $x);
 }
@@ -144,14 +161,6 @@ function lto_timestamp(): Closure {
 
 function ltake_col($key): Closure {
     return fn($x) => array_column($x, $key);
-}
-
-function to_float($x): float {
-    return floatval($x);
-}
-
-function lto_float(): Closure {
-    return fn($x) => to_float($x);
 }
 
 function lhead(): Closure {
@@ -220,6 +229,7 @@ function lbind_error(callable $f): Closure {
     return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
 }
 
+/* find_keys_where :: array -> predicate -> array */
 function find_keys_where(array $a, callable $predicate): array {
     return f\pipe([
         larray_filter($predicate),
@@ -227,6 +237,7 @@ function find_keys_where(array $a, callable $predicate): array {
     ])($a);
 }
 
+/* lfind_keys_where :: predicate -> (array -> array) */
 function lfind_keys_where(callable $predicate): Closure {
     return fn($x) => find_keys_where($x, $predicate);
 }
@@ -251,55 +262,83 @@ function llocate(callable $predicate): Closure {
     return fn($x) => locate($x, $predicate);
 }
 
+/* is_associative :: array -> bool */
+function is_associative(array $a): bool {
+    $count_of_string_keys_in_array = f\pipe([
+        larray_keys(),
+        f\lfilter(fn($x) => is_string($x)),
+        fn($x) => count($x),
+    ])($a);
+    return $count_of_string_keys_in_array > 0;
+}
+
+/* lis_associative :: () -> (array -> bool) */
+function lis_associative(): Closure {
+    return fn($x) => is_associative($x);
+}
+
+/* extract_element_from_list_where_contained_key_value_matches
+ * :: array -> key -> predicate -> assoc */
+function extract_element_from_list_where_contained_key_value_matches(
+    array $list,
+    $key,
+    callable $predicate
+): array {
+    $is_our_element
+        = function ($x) use ($key, $predicate) {
+            if (!is_associative($x)) return [];
+            return $predicate($x[$key]);
+        };
+
+    $element = f\find($list, $is_our_element);
+
+    if ($element === null) return [];
+    return $element;
+}
+
 /* extract_element_from_list_by_contained_key_value
- * :: array -> string -> any -> assoc */
+ * :: array -> key -> any -> assoc */
 function extract_element_from_list_by_contained_key_value(
     array $list,
-    string $key_name,
+    $key,
     $target_value
 ): array {
     $target_value_type = gettype($target_value);
 
     $is_our_element
-        = function ($x) use ($key_name, $target_value, $target_value_type) {
-            $is_associative
-                = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
-
-            if (!$is_associative($x)) return [];
-            settype($x[$key_name], $target_value_type);
-            return $x[$key_name] === $target_value;
+        = function ($x) use ($key, $target_value, $target_value_type) {
+            if (!is_associative($x)) return [];
+            settype($x[$key], $target_value_type);
+            return $x[$key] === $target_value;
         };
 
-    $element = f\pipe([
-        f\lfilter($is_our_element),
-        lhead()
-    ])($list);
+    $element = f\find($list, $is_our_element);
 
     if ($element === null) return [];
     return $element;
 }
 
 /* lextract_element_from_list_by_contained_key_value
- * :: string -> any -> (array -> array) */
+ * :: key -> any -> (array -> array) */
 function lextract_element_from_list_by_contained_key_value(
-    string $key_name,
+    $key,
     $target_value
 ): Closure {
     return fn($x) => extract_element_from_list_by_contained_key_value(
                         $x,
-                        $key_name,
+                        $key,
                         $target_value);
 }
 
 /* element_with_key_value_exists_in_list
- * :: array -> string -> any -> bool */
+ * :: array -> key -> any -> bool */
 function element_with_key_value_exists_in_list(
     array $list,
-    string $key_name,
+    $key,
     $target_value
 ): bool {
     $is_our_element
-        = llist_element_contains_key_value($key_name, $target_value);
+        = llist_element_contains_key_value($key, $target_value);
 
     return f\pipe([
         f\lfilter($is_our_element),
@@ -308,14 +347,14 @@ function element_with_key_value_exists_in_list(
 }
 
 /* lelement_with_key_value_exists_in_list
- * :: string -> any -> (array -> bool) */
+ * :: key -> any -> (array -> bool) */
 function lelement_with_key_value_exists_in_list(
-    string $key_name,
+    $key,
     $target_value
 ): Closure {
     return fn($x) => element_with_key_value_exists_in_list(
                         $x,
-                        $key_name,
+                        $key,
                         $target_value);
 }
 
@@ -323,11 +362,11 @@ function lelement_with_key_value_exists_in_list(
  * :: array -> string -> any -> int */
 function get_first_index_where_element_contains_key_value(
     array $list,
-    string $key_name,
+    $key,
     $target_value
 ) {
     $is_our_element
-        = llist_element_contains_key_value($key_name, $target_value);
+        = llist_element_contains_key_value($key, $target_value);
 
     return f\pipe([
         f\lfilter($is_our_element),
@@ -339,13 +378,13 @@ function get_first_index_where_element_contains_key_value(
 /* lget_first_index_where_element_contains_key_value
  * :: string -> any -> (array -> int) */
 function lget_first_index_where_element_contains_key_value(
-    string $key_name,
+    $key,
     $target_value
 ): Closure {
     return
         fn($x) => get_first_index_where_element_contains_key_value(
                     $x,
-                    $key_name,
+                    $key,
                     $target_value);
 }
 
@@ -357,7 +396,7 @@ function lempty(): Closure {
 /* list_element_contains_key_value :: array -> string -> any -> bool */
 function list_element_contains_key_value(
     array $element,
-    string $key_name,
+    $key,
     $target_value
 ): bool {
     $target_value_type = gettype($target_value);
@@ -367,20 +406,20 @@ function list_element_contains_key_value(
 
     if (!$is_associative($element)) return [];
 
-    settype($element[$key_name], $target_value_type);
-    return $element[$key_name] === $target_value;
+    settype($element[$key], $target_value_type);
+    return $element[$key] === $target_value;
 }
 
 /* llist_element_contains_key_value
  * :: string -> any -> (array -> string -> any -> bool) */
 function llist_element_contains_key_value(
-    string $key_name,
+    $key,
     $target_value
 ): Closure {
     return
         fn($x) => list_element_contains_key_value(
                     $x,
-                    $key_name,
+                    $key,
                     $target_value);
 }
 
