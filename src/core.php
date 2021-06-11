@@ -496,3 +496,47 @@ function update_nested_key_val(array $a, array $keys, callable $f): array {
 function lupdate_nested_key_val(array $keys, callable $f): Closure {
     return fn($a) => update_nested_key_val($a, $keys, $f);
 }
+
+/**
+ * Splits an array into an array of keys, and an array of values
+ *
+ * split_array_key_vals :: array -> [ array, array ]
+ */
+function split_array_key_vals(array $a): array {
+    $keys = array_keys($a);
+    $vals = array_values($a);
+    return [ $keys, $vals ];
+}
+
+/* lsplit_array_key_vals :: () -> (array -> [ array, array ]) */
+function lsplit_array_key_vals(): Closure {
+    return fn($x) => split_array_key_vals($x);
+}
+
+/* array_contains_key_vals :: array -> array -> bool */
+function array_contains_key_vals(array $a, array $key_vals): bool {
+    $key_value_pair_matches
+        = fn($key_name) => ($a[$key_name] === $key_vals[$key_name]);
+
+    return f\pipe([
+        larray_keys(),
+        lis_true_for_all_elements($key_value_pair_matches),
+    ])($key_vals);
+}
+
+/* larray_contains_key_vals :: array -> (array -> bool) */
+function larray_contains_key_vals(array $key_vals): Closure {
+    return fn($a) => array_contains_key_vals($a, $key_vals);
+}
+
+/* is_true_for_all_elements :: array -> predicate -> bool */
+function is_true_for_all_elements(array $a, callable $predicate): bool {
+    return f\fold( $a, true,
+            fn($elem, $all_match) =>
+                ($all_match === true && $predicate($elem)));
+}
+
+/* lis_true_for_all_elements :: predicate -> (array -> bool) */
+function lis_true_for_all_elements(callable $predicate): Closure {
+    return fn($a) => is_true_for_all_elements($a, $predicate);
+}
