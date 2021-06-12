@@ -540,3 +540,25 @@ function is_true_for_all_elements(array $a, callable $predicate): bool {
 function lis_true_for_all_elements(callable $predicate): Closure {
     return fn($a) => is_true_for_all_elements($a, $predicate);
 }
+
+/* is_true_for_some_element :: array -> predicate -> bool */
+function is_true_for_some_element(array $a, callable $predicate): bool {
+    return f\fold( $a, true,
+            fn($elem, $all_match) =>
+                ($all_match === false || $predicate($elem)));
+}
+
+/* lis_true_for_some_element :: predicate -> (array -> bool) */
+function lis_true_for_some_element(callable $predicate): Closure {
+    return fn($a) => is_true_for_some_element($a, $predicate);
+}
+
+/* extract_values_from_array :: array -> array -> array */
+function extract_values_from_array(array $a, array $keys): array {
+    return f\map($keys, fn($key) => $a[$key]);
+}
+
+/* lextract_values_from_array :: array -> (array -> array) */
+function lextract_values_from_array(array $keys): Closure {
+    return fn($a) => extract_values_from_array($a, $keys);
+}
