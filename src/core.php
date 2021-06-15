@@ -516,7 +516,9 @@ function lsplit_array_key_vals(): Closure {
 /* array_contains_key_vals :: array -> array -> bool */
 function array_contains_key_vals(array $a, array $key_vals): bool {
     $key_value_pair_matches
-        = fn($key_name) => ($a[$key_name] === $key_vals[$key_name]);
+        = fn($key_name) =>
+        array_key_exists($key_name, $a)
+            && ($a[$key_name] === $key_vals[$key_name]);
 
     return f\pipe([
         larray_keys(),
@@ -532,8 +534,8 @@ function larray_contains_key_vals(array $key_vals): Closure {
 /* is_true_for_all_elements :: array -> predicate -> bool */
 function is_true_for_all_elements(array $a, callable $predicate): bool {
     return f\fold( $a, true,
-            fn($elem, $all_match) =>
-                ($all_match === true && $predicate($elem)));
+            fn($all_match, $elem) =>
+                ($all_match == true && $predicate($elem)));
 }
 
 /* lis_true_for_all_elements :: predicate -> (array -> bool) */
@@ -543,9 +545,9 @@ function lis_true_for_all_elements(callable $predicate): Closure {
 
 /* is_true_for_some_element :: array -> predicate -> bool */
 function is_true_for_some_element(array $a, callable $predicate): bool {
-    return f\fold( $a, true,
-            fn($elem, $all_match) =>
-                ($all_match === false || $predicate($elem)));
+    return f\fold( $a, false,
+            fn($all_match, $elem) =>
+                ($all_match == true || $predicate($elem)));
 }
 
 /* lis_true_for_some_element :: predicate -> (array -> bool) */

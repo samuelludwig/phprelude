@@ -40,4 +40,54 @@ class CoreTest extends TestCase {
         $this->assertTrue($result);
     }
 
+    public function testArrayContainsKeyVal() {
+        $array = [ 'name' => 'me', 'pet' => 'cat' ];
+
+        $result1
+            = p\array_contains_key_vals(
+                $array,
+                [ 'pet' => 'cat' ]);
+
+        $this->assertTrue($result1);
+
+        $result2
+            = p\array_contains_key_vals(
+                $array,
+                [ 'orange' => 'dog' ]);
+
+        $this->assertFalse($result2);
+
+        $lambda
+            = p\larray_contains_key_vals(['pet' => 'cat']);
+        $lambda_result = $lambda($array);
+        $this->assertTrue($lambda_result);
+    }
+
+    public function testIsTrueForAllElements() {
+        $array = [ 1, 2, 3 ];
+
+        $result
+            = p\is_true_for_all_elements(
+                $array,
+                fn($x) => $x > 0);
+
+        $this->assertTrue($result);
+
+        $lambda
+            = p\lis_true_for_all_elements(fn($x) => $x > 0);
+        $lambda_result = $lambda($array);
+        $this->assertTrue($lambda_result);
+
+        $result
+            = p\is_true_for_all_elements(
+                $array,
+                fn($x) => $x > 4);
+
+        $this->assertFalse($result);
+
+        $lambda
+            = p\lis_true_for_all_elements(fn($x) => $x > 4);
+        $lambda_result = $lambda($array);
+        $this->assertFalse($lambda_result);
+    }
 }
