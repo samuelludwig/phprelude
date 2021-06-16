@@ -90,4 +90,23 @@ class CoreTest extends TestCase {
         $lambda_result = $lambda($array);
         $this->assertFalse($lambda_result);
     }
+
+    public function testExtractValuesFromArrayIntoFormat() {
+        $array = ['my_name' => 'me', 'my_age' => 65, 'dogs_name' => 'cat'];
+        $result
+            = p\extract_values_from_array_into_format(
+                $array,
+                ['name' => 'my_name', 'age' => 'my_age']);
+        $expected = ['name' => 'me', 'age' => 65];
+
+        $this->assertEquals($expected, $result);
+
+        $lambda
+            = p\lextract_values_from_array_into_format(
+                ['name' => 'my_name', 'age' => 'my_age']);
+
+        $lambda_result = $lambda($array);
+
+        $this->assertEquals($expected, $lambda_result);
+    }
 }

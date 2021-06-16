@@ -564,3 +564,18 @@ function extract_values_from_array(array $a, array $keys): array {
 function lextract_values_from_array(array $keys): Closure {
     return fn($a) => extract_values_from_array($a, $keys);
 }
+
+/* extract_values_from_array_into_format :: array -> array -> array */
+function extract_values_from_array_into_format(
+    array $a,
+    array $key_format
+): array {
+    [$format_keys, $source_keys] = split_array_key_vals($key_format);
+    $source_values = f\map($source_keys, fn($key) => $a[$key]);
+    return array_combine($format_keys, $source_values);
+}
+
+/* lextract_values_from_array_into_format :: array -> (array -> array) */
+function lextract_values_from_array_into_format(array $key_format): Closure {
+    return fn($a) => extract_values_from_array_into_format($a, $key_format);
+}
