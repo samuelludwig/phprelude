@@ -592,3 +592,40 @@ function filter_unique_arrays(array $arrays): array {
 function lfilter_unique_arrays(): Closure {
     return fn($a) => filter_unique_arrays($a);
 }
+
+/* each :: array -> callable -> array */
+function each(array $a, callable $f): array {
+    $results = [];
+    foreach ($a as $v) $results[] = $f($v);
+    return $results;
+}
+
+/* leach :: callable -> (array -> array) */
+function leach(callable $f): Closure {
+    return fn($a) => each($a, $f);
+}
+
+/* each_with_index :: array -> callable -> array */
+function each_with_index(array $a, callable $f): array {
+    $results = [];
+    foreach ($a as $k => $v) $results[] = $f($k, $v);
+    return $results;
+}
+
+/* leach_with_index :: callable -> (array -> array) */
+function leach_with_index(callable $f): Closure {
+    return fn($a) => each($a, $f);
+}
+
+/* map_with_index :: array -> callable -> array */
+function map_with_index(array $a, callable $f): array {
+    $agg = [];
+    foreach ($a as $k => $v) $agg[$k] = $f($k, $v);
+    return $agg;
+}
+
+/* lmap_with_index :: callable -> (array -> array) */
+function lmap_with_index(callable $f): Closure {
+    return fn($a) => each($a, $f);
+}
+

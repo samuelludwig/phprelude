@@ -135,4 +135,35 @@ class CoreTest extends TestCase {
 
         $this->assertEqualsCanonicalizing($expected, $lambda_result);
     }
+
+    public function testEach() {
+        $modifier = fn($_) => [];
+        $array = [ 'a', 'b', 'c' ];
+
+        $result = p\each($array, $modifier);
+        $expected = [ [], [], [] ];
+
+        $this->assertEquals($expected, $result);
+
+        $lambda = p\leach($modifier);
+        $lambda_result = $lambda($array);
+
+        $this->assertEquals($expected, $lambda_result);
+
+        $modifier = fn($k, $v) => "$k$v";
+        $array = [ 'a' => 1, 'b' => 2, 'c' => 3 ];
+
+        $result = p\each_with_index($array, $modifier);
+        $expected = [ 'a1', 'b2', 'c3' ];
+
+        $this->assertEquals($expected, $result);
+
+        $modifier = fn($k, $v) => "$k$v";
+        $array = [ 'a' => 1, 'b' => 2, 'c' => 3 ];
+
+        $result = p\map_with_index($array, $modifier);
+        $expected = [ 'a' => 'a1', 'b' => 'b2', 'c' => 'c3' ];
+
+        $this->assertEquals($expected, $result);
+    }
 }
