@@ -109,4 +109,30 @@ class CoreTest extends TestCase {
 
         $this->assertEquals($expected, $lambda_result);
     }
+
+    public function testFilterUniqueArrays() {
+        $arrays
+            = [ ['a' => 'b', 'c' => 'd', 'e' => ['f', 'g']]
+              , ['a' => 'b', 'c' => 'd', 'e' => ['f', 'g']]
+              , ['a' => 'b', 'c' => 'd', 'e' => ['x', 'y']]
+              , ['a' => 'b', 'c' => 'd', 'z' => ['x', 'y']]
+              ];
+
+        $result
+            = p\filter_unique_arrays($arrays);
+
+        $expected
+            = [ ['a' => 'b', 'c' => 'd', 'e' => ['f', 'g']]
+              , ['a' => 'b', 'c' => 'd', 'e' => ['x', 'y']]
+              , ['a' => 'b', 'c' => 'd', 'z' => ['x', 'y']]
+              ];
+
+        $this->assertEqualsCanonicalizing($expected, $result);
+
+        $lambda = p\lfilter_unique_arrays();
+
+        $lambda_result = $lambda($arrays);
+
+        $this->assertEqualsCanonicalizing($expected, $lambda_result);
+    }
 }

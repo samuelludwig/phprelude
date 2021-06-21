@@ -565,7 +565,8 @@ function lextract_values_from_array(array $keys): Closure {
     return fn($a) => extract_values_from_array($a, $keys);
 }
 
-/* extract_values_from_array_into_format :: array -> array -> array */
+/* extract_values_from_array_into_format :: array -> array -> array
+ * TODO: make this work recursively (i.e., multiple levels deep)? */
 function extract_values_from_array_into_format(
     array $a,
     array $key_format
@@ -578,4 +579,16 @@ function extract_values_from_array_into_format(
 /* lextract_values_from_array_into_format :: array -> (array -> array) */
 function lextract_values_from_array_into_format(array $key_format): Closure {
     return fn($a) => extract_values_from_array_into_format($a, $key_format);
+}
+
+/* filter_unique_arrays :: array -> array */
+function filter_unique_arrays(array $arrays): array {
+    $serialized = array_map('serialize', $arrays);
+    $unique = array_unique($serialized);
+    return array_intersect_key($arrays, $unique);
+}
+
+/* lfilter_unique_arrays :: () -> (array -> array) */
+function lfilter_unique_arrays(): Closure {
+    return fn($a) => filter_unique_arrays($a);
 }
