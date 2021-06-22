@@ -614,7 +614,7 @@ function each_with_index(array $a, callable $f): array {
 
 /* leach_with_index :: callable -> (array -> array) */
 function leach_with_index(callable $f): Closure {
-    return fn($a) => each($a, $f);
+    return fn($a) => each_with_index($a, $f);
 }
 
 /* map_with_index :: array -> callable -> array */
