@@ -1,4 +1,4 @@
-<?php declare(strict_types=1); namespace Phprelude\IO;
+<?php declare(strict_types=1); namespace Phprelude\Io;
 use Closure;
 
 /* inspect :: any -> any

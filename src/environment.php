@@ -1,4 +1,4 @@
-<?php declare(strict_types=1); namespace Phprelude\Core;
+<?php declare(strict_types=1); namespace Phprelude\Environment;
 use Closure;
 
 /* getenv_with_default :: string -> string -> string

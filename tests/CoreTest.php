@@ -1,8 +1,10 @@
 <?php declare(strict_types=1); namespace Phprelude\Test\Core;
 require_once __DIR__ . '/../src/core.php';
+require_once __DIR__ . '/../src/str.php';
 
 use \PHPUnit\Framework\TestCase;
 use \Phprelude\Core as c;
+use \Phprelude\Str;
 
 class CoreTest extends TestCase {
 
@@ -38,15 +40,6 @@ class CoreTest extends TestCase {
         $this->assertFalse(c\isnull([])());
     }
 
-    public function testConcat()
-    {
-        $concat = c\concat('|');
-
-        $this->assertSame('foo|bar', $concat('foo', 'bar'));
-        $this->assertSame('foo', $concat('foo', false));
-        $this->assertSame('foo', $concat('foo', null));
-    }
-
     public function testLazy()
     {
         $will_trim = c\lazy('trim', ' foo ');
@@ -71,7 +64,7 @@ class CoreTest extends TestCase {
         $this->assertSame(
             'foobar',
             c\conduit([
-                c\lconcat()('bar')
+                Str\lconcat()('bar')
             ])('foo')
         );
     }
