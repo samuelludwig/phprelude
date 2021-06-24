@@ -819,11 +819,20 @@ function lsort(callable $test): Closure
     };
 }
 
-// TODO
-function take(array $a, int $count): array {
-    return [[], []];
+/* take :: array -> int -> Optional bool -> array */
+function take(array $a, int $count, bool $preserve_keys = false): array {
+    return array_slice($a, 0, $count, $preserve_keys);
 }
 
-function ltake(int $count): Closure {
-    return fn($a) => take($a, $count);
+function ltake(int $count, bool $preserve_keys = false): Closure {
+    return fn($a) => take($a, $count, $preserve_keys);
+}
+
+/* drop :: array -> int -> Optional bool -> array */
+function drop(array $a, int $count, bool $preserve_keys = false): array {
+    return array_slice($a, $count, null, $preserve_keys);
+}
+
+function ldrop(int $count, bool $preserve_keys = false): Closure {
+    return fn($a) => drop($a, $count, $preserve_keys);
 }
