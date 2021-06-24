@@ -1,4 +1,6 @@
 <?php declare(strict_types=1); namespace Phprelude\Core;
+require_once __DIR__ . '/enum.php';
+use Phprelude\Enum;
 
 /*
  * In computer science, functional programming is a programming paradigm
@@ -14,6 +16,7 @@ function require_directory($path) {
     foreach (glob("{$path}/*.php") as $filename) {
         require_once $filename;
     }
+    return ':ok';
 }
 
 /**
@@ -587,9 +590,9 @@ function lbound_val($lower_bound, $upper_bound): Closure {
 }
 
 function lmax(...$args): Closure {
-    return fn($x) => max(flatten([$x, $args]));
+    return fn($x) => max(Enum\flatten([$x, $args]));
 }
 
 function lmin(...$args): Closure {
-    return fn($x) => min(flatten([$x, $args]));
+    return fn($x) => min(Enum\flatten([$x, $args]));
 }

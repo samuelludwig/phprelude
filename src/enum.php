@@ -464,8 +464,7 @@ function leach_with_index(callable $f): Closure {
  * @return mixed[]
  * @psalm-return O[]
  */
-function map($list, callable $callback): array
-{
+function map($list, callable $callback): array {
     $agg = [];
 
     /**
@@ -486,8 +485,7 @@ function map($list, callable $callback): array
  * @param callable(I, array-key): O $callback
  * @return Closure(\Traversable<I>|I[]): O[]
  */
-function lmap(callable $callback): Closure
-{
+function lmap(callable $callback): Closure {
     return
         /**
          * @param Traversable|array $list
@@ -522,8 +520,7 @@ function lmap_with_index(callable $f): Closure {
  * @return mixed
  * @psalm-return T
  */
-function fold(array $list, $initial, callable $callback)
-{
+function fold(array $list, $initial, callable $callback) {
     /** @psalm-var T $value */
     $value = $initial;
 
@@ -550,8 +547,7 @@ function lfold($initial, callable $callback): Closure {
  * @return mixed|null
  * @psalm-return T|null
  */
-function first(array $list, callable $test, $if_empty = null)
-{
+function first(array $list, callable $test, $if_empty = null) {
     if (empty($list)) {
         return $if_empty;
     }
@@ -568,8 +564,7 @@ function first(array $list, callable $test, $if_empty = null)
  * @psalm-param T|null $if_empty
  * @return Closure(T[]):(T|null)
  */
-function lfirst(callable $test, $if_empty = null): Closure
-{
+function lfirst(callable $test, $if_empty = null): Closure {
     return function (array $list) use ($test, $if_empty) {
         return first($list, $test, $if_empty);
     };
@@ -584,8 +579,7 @@ function lfirst(callable $test, $if_empty = null): Closure
  * @return mixed[]
  * @psalm-return list<T>
  */
-function flatten(array $list): array
-{
+function flatten(array $list): array {
     /** @psalm-var list<T> $flat */
     $flat = [];
 
@@ -616,8 +610,7 @@ function flatten(array $list): array
  * @return mixed|null
  * @psalm-return T|null
  */
-function head(array $list, $default = null)
-{
+function head(array $list, $default = null) {
     if (empty($list)) {
         return $default;
     }
@@ -633,8 +626,7 @@ function head(array $list, $default = null)
  *
  * @return mixed|null
  */
-function last(array $list, $default = null)
-{
+function last(array $list, $default = null) {
     if (empty($list)) {
         return $default;
     }
@@ -649,8 +641,7 @@ function last(array $list, $default = null)
  *
  * @return array
  */
-function tail(array $list)
-{
+function tail(array $list) {
     return array_slice($list, 1);
 }
 
@@ -661,8 +652,7 @@ function tail(array $list)
  *
  * @return array
  */
-function init(array $list): array
-{
+function init(array $list): array {
     return array_slice($list, 0, -1);
 }
 
@@ -672,8 +662,7 @@ function init(array $list): array
  * @param array $list
  * @return array{0: mixed, 1: array}
  */
-function uncons(array $list): array
-{
+function uncons(array $list): array {
     return [$list[0], array_slice($list, 1)];
 }
 
@@ -684,8 +673,7 @@ function uncons(array $list): array
  *
  * @return mixed[]
  */
-function non_null(array $list): array
-{
+function non_null(array $list): array {
     return array_values(
         array_filter($list, function ($item) {
             return $item !== null;
@@ -699,8 +687,7 @@ function non_null(array $list): array
  * @param array $list
  * @return array
  */
-function non_empty(array $list): array
-{
+function non_empty(array $list): array {
     return array_values(
         array_filter($list, function ($item) {
             return !empty($item);
@@ -714,8 +701,7 @@ function non_empty(array $list): array
  * @param string $glue
  * @return Closure(array): string
  */
-function ljoin(string $glue = ''): Closure
-{
+function ljoin(string $glue = ''): Closure {
     return static function (array $pieces) use ($glue): string {
         return join($glue, $pieces);
     };
@@ -731,8 +717,7 @@ function ljoin(string $glue = ''): Closure
  * @return mixed[]
  * @psalm-return T[]
  */
-function filter(array $input, callable $callback): array
-{
+function filter(array $input, callable $callback): array {
     return array_values(array_filter($input, $callback));
 }
 
@@ -743,8 +728,7 @@ function filter(array $input, callable $callback): array
  * @param callable(T):bool $callback
  * @return Closure(T[]):T[]
  */
-function lfilter(callable $callback): Closure
-{
+function lfilter(callable $callback): Closure {
     return function (array $input) use ($callback): array {
         return filter($input, $callback);
     };
@@ -762,8 +746,7 @@ function lfilter(callable $callback): Closure
  * @return mixed|null
  * @psalm-return T|null
  */
-function find(array $list, callable $predicate, $default = null)
-{
+function find(array $list, callable $predicate, $default = null) {
     foreach ($list as $item) {
         if ($predicate($item)) {
             return $item;
@@ -782,8 +765,7 @@ function find(array $list, callable $predicate, $default = null)
  * @psalm-param T|null $default
  * @return Closure(T[]):(T|null)
  */
-function lfind(callable $predicate, $default = null): Closure
-{
+function lfind(callable $predicate, $default = null): Closure {
     return function (array $list) use ($predicate, $default) {
         return find($list, $predicate, $default);
     };
@@ -799,8 +781,7 @@ function lfind(callable $predicate, $default = null): Closure
  * @return array
  * @psalm-return T[]
  */
-function sort(array $list, callable $test): array
-{
+function sort(array $list, callable $test): array {
     usort($list, $test);
     return $list;
 }
@@ -812,8 +793,7 @@ function sort(array $list, callable $test): array
  * @param callable(T, T):int $test
  * @return Closure(T[]):T[]
  */
-function lsort(callable $test): Closure
-{
+function lsort(callable $test): Closure {
     return function (array $list) use ($test) {
         return sort($list, $test);
     };
