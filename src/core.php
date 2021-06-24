@@ -1,4 +1,5 @@
 <?php declare(strict_types=1); namespace Phprelude\Core;
+
 /*
  * In computer science, functional programming is a programming paradigm
  * a style of building the structure and elements of computer programs
@@ -7,6 +8,13 @@
  */
 
 use Closure;
+
+/* TODO: Come up with recursive-dir-eval method */
+function require_directory($path) {
+    foreach (glob("{$path}/*.php") as $filename) {
+        require_once $filename;
+    }
+}
 
 /**
  * Identity function.
