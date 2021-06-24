@@ -1,129 +1,546 @@
 <?php declare(strict_types=1); namespace Phprelude\Core;
-require_once __DIR__ . '/../vendor/autoload.php';
-use \Siler\Functional as f;
+/*
+ * In computer science, functional programming is a programming paradigm
+ * a style of building the structure and elements of computer programs
+ * that treats computation as the evaluation of mathematical functions
+ * and avoids changing-state and mutable data.
+ */
+
 use Closure;
 
 /**
- * Notes
- * -----
- * - f\filter vs array_filter: the former destroys keys, the latter does not.
+ * Identity function.
  *
- * Types
- * -----
- * any :: mixed
- * predicate :: callable
- * key :: string|int
+ * @template T
+ * @return Closure(T): T
  */
-
-/* getenv_with_default :: string -> string -> string
- * !impure: reads from environment */
-function getenv_with_default(
-    string $environment_variable_name,
-    string $default_value
-): string {
-    $environment_variable_value = getenv($environment_variable_name);
-    if ($environment_variable_value === false) return $default_value;
-    return $environment_variable_value;
-}
-
-/* split_array_into_pairs :: array -> array */
-function split_array_into_pairs(array $x): array {
-    return array_chunk($x, 2);
-}
-
-/* lsplit_array_into_pairs :: () -> (array -> array) */
-function lsplit_array_into_pairs(): Closure {
-    return fn($x) => split_array_into_pairs($x);
-}
-
-/* ljson_decode :: () -> (string -> array) */
-function ljson_decode(): Closure {
-    return fn($x) => json_decode($x, true);
-}
-
-/* ljson_encode :: Optional bool -> (array -> string) */
-function ljson_encode($pretty_print = false): Closure {
-    if ($pretty_print === true)
-        return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
-
-    return fn($x) => json_encode($x);
-}
-
-/* lfile_get_contents :: () -> (string -> string|bool) */
-function lfile_get_contents(): Closure {
-    return fn($x) => file_get_contents($x);
-}
-
-/* json_file_to_array :: string -> array */
-function json_file_to_array(string $file_location): array {
-    return f\pipe([
-        lfile_get_contents(),
-        ljson_decode()
-    ])($file_location);
-}
-
-/* take_key :: array -> key -> Optional any -> any */
-function take_key(array $a, $key, $default = null) {
-    if (isset($a[$key])) return $a[$key];
-    return $default;
-}
-
-/* ltake_key :: key -> Optional any -> (array -> any) */
-function ltake_key($key, $default = null): Closure {
-    return fn($x) => take_key($x, $key, $default);
-}
-
-/* larray_diff :: array -> (array -> array) */
-function larray_diff(array $a): Closure {
-    return fn($x) => array_diff($x, $a);
-}
-
-/* larray_diffr :: array -> (array -> array) */
-function larray_diffr(array $a): Closure {
-    return fn($x) => array_diff($a, $x);
+function identity(): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @psalm-param T $value
+         * @return mixed
+         * @psalm-return T
+         */
+        static function ($value) {
+            return $value;
+        };
 }
 
 /**
- * Rotates array values to the left, does not preserve indicies or keys.
+ * Is a unary function which evaluates to $value for all inputs.
  *
- * rotate_array :: array -> array */
-function rotate_array(array $a): array {
-    array_push($a, array_shift($a));
-    return $a;
+ * @template T
+ * @param mixed $value
+ * @psalm-param T $value
+ * @return Closure(): T
+ */
+function always($value): Closure
+{
+    return
+        /**
+         * @return mixed
+         * @psalm-return T
+         */
+        static function () use ($value) {
+            return $value;
+        };
 }
 
-/* lrotate_array :: () -> (array -> array) */
-function lrotate_array(): Closure {
-    return fn($x) => rotate_array($x);
+/**
+ * Returns TRUE if $left is equal to $right and they are of the same type.
+ *
+ * @param mixed $right
+ *
+ * @return Closure(mixed): bool
+ */
+function equal($right): Closure
+{
+    return
+        /**
+         * @param mixed $left
+         * @return bool
+         */
+        static function ($left) use ($right) {
+            return $left === $right;
+        };
 }
 
-/* define_constant_from_environment_variable
- * :: string -> string -> array
- * !impure: reads from environment; creates a global constant */
-function define_constant_from_environment_variable(
-    string $environment_variable_name,
-    string $default_environment_variable_value
-): array {
-    $environment_variable_value =
-        getenv_with_default(
-            $environment_variable_name,
-            $default_environment_variable_value);
-
-    define($environment_variable_name, $environment_variable_value);
-
-    return [ ':ok', true ];
+/**
+ * Returns TRUE if $left is strictly less than $right.
+ *
+ * @param mixed $right
+ *
+ * @return Closure(mixed): bool
+ */
+function less_than($right): Closure
+{
+    return
+        /**
+         * @param mixed $left
+         * @return bool
+         */
+        static function ($left) use ($right) {
+            return $left < $right;
+        };
 }
 
-function get_random_element_from_array(array $a) {
-    return array_rand($a, 1);
+/**
+ * Returns TRUE if $left is strictly greater than $right.
+ *
+ * @param mixed $right
+ *
+ * @return Closure(mixed): bool
+ */
+function greater_than($right): Closure
+{
+    return
+        /**
+         * @param mixed $left
+         * @return bool
+         */
+        static function ($left) use ($right) {
+            return $left > $right;
+        };
 }
 
-function lget_random_element_from_array(): Closure {
-    return fn($x) => get_random_element_from_array($x);
+/**
+ * It allows for conditional execution of code fragments.
+ *
+ * @template I
+ * @template O
+ * @param callable(I):bool $cond
+ * @return Closure(callable(I):O):((\Closure(callable(I):O):\Closure(I):O)
+ */
+function if_else(callable $cond): Closure
+{
+    return
+        /**
+         * @param callable(I):O $then
+         * @return Closure(callable(I):O):(Closure(I):O)
+         */
+        static function (callable $then) use ($cond): Closure {
+            return
+                /**
+                 * @param callable(I):O $else
+                 * @return Closure(I):O
+                 */
+                static function (callable $else) use ($cond, $then): Closure {
+                    return
+                        /**
+                         * @param mixed $value
+                         * @psalm-param I $value
+                         * @return mixed
+                         * @psalm-return O
+                         */
+                        static function ($value) use ($cond, $then, $else) {
+                            return $cond($value) ? $then($value) : $else($value);
+                        };
+                };
+        };
 }
 
-function lfold($initial, callable $callback): Closure {
-    return fn($x) => f\fold($x, $initial, $callback);
+/**
+ * Pattern-Matching Semantics.
+ *
+ * @template I
+ * @template O
+ * @param array{callable(I):bool, callable(I):O}[] $matches
+ * @param callable(I):O $exhaust
+ * @return Closure(I):O
+ */
+function matching(array $matches, callable $exhaust): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @psalm-param I $value
+         * @return mixed
+         * @psalm-return O
+         */
+        static function ($value) use ($matches, $exhaust) {
+            foreach ($matches as [$predicate, $callback]) {
+                if ($predicate($value)) {
+                    return $callback($value);
+                }
+            }
+
+            return $exhaust($value);
+        };
+}
+
+/**
+ * Determines whether any returns of $functions is true-ish.
+ *
+ * @param iterable<callable> $functions
+ *
+ * @return Closure(mixed): bool
+ */
+function any(iterable $functions): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @return bool
+         */
+        static function ($value) use ($functions): bool {
+            foreach ($functions as $function) {
+                if ($function($value)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+}
+
+/**
+ * Determines whether all returns of $functions are true-ish.
+ *
+ * @param iterable<callable> $functions
+ *
+ * @return Closure(mixed): bool
+ */
+function all(iterable $functions): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @return bool
+         */
+        static function ($value) use ($functions): bool {
+            foreach ($functions as $function) {
+                if (!$function($value)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+}
+
+/**
+ * Boolean "not".
+ *
+ * @param callable $function
+ *
+ * @return Closure(mixed): bool
+ */
+function not(callable $function): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @return bool
+         */
+        static function ($value) use ($function): bool {
+            return !$function($value);
+        };
+}
+
+/**
+ * Function composition is the act of pipelining the result of one function,
+ * to the input of another, creating an entirely new function.
+ *
+ * @param array<callable> $functions
+ *
+ * @return Closure(mixed): mixed
+ */
+function compose(array $functions): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @return mixed
+         */
+        static function ($value) use ($functions) {
+            return array_reduce(
+                array_reverse($functions),
+                /**
+                 * @param mixed $value
+                 * @param callable $function
+                 * @return mixed
+                 */
+                static function ($value, $function) {
+                    return $function($value);
+                },
+                $value
+            );
+        };
+}
+
+/**
+ * Converts the given $value to a boolean.
+ *
+ * @return Closure(mixed): bool
+ */
+function bool(): Closure
+{
+    return
+        /**
+         * @param mixed $value
+         * @return bool
+         */
+        static function ($value): bool {
+            return (bool)$value;
+        };
+}
+
+/**
+ * In computer science, a NOP or NOOP (short for No Operation) is an assembly language instruction,
+ * programming language statement, or computer protocol command that does nothing.
+ *
+ * @return Closure(): void
+ */
+function noop(): Closure
+{
+    return static function (): void {
+    };
+}
+
+/**
+ * Holds a function for lazily call.
+ *
+ * @param callable $function
+ *
+ * @return Closure(): mixed
+ */
+function hold(callable $function): Closure
+{
+    return
+        /**
+         * @return mixed
+         */
+        static function () use ($function) {
+            return call_user_func_array($function, array_values(func_get_args()));
+        };
+}
+
+/**
+ * Lazy echo.
+ *
+ * @param string $value
+ *
+ * @return Closure(): void
+ */
+function puts($value): Closure
+{
+    return static function () use ($value): void {
+        echo $value;
+    };
+}
+
+/**
+ * Partial application.
+ *
+ * @param callable $callable
+ * @param mixed ...$partial
+ *
+ * @return Closure(mixed[]): mixed
+ */
+function partial(callable $callable, ...$partial): Closure
+{
+    return
+        /**
+         * @param mixed[] $args
+         * @return mixed
+         */
+        static function (...$args) use ($callable, $partial) {
+            return call_user_func_array($callable, array_merge($partial, $args));
+        };
+}
+
+/**
+ * Calls a function if the predicate is true.
+ *
+ * @template T
+ * @param callable $predicate
+ * @return Closure(callable():T):(T|null)
+ */
+function if_then(callable $predicate): Closure
+{
+    return function (callable $then) use ($predicate) {
+        if ($predicate()) {
+            return $then();
+        }
+
+        return null;
+    };
+}
+
+/**
+ * A lazy empty evaluation.
+ *
+ * @param mixed $var
+ *
+ * @return Closure():bool
+ */
+function is_empty($var): Closure
+{
+    return static function () use ($var): bool {
+        return empty($var);
+    };
+}
+
+/**
+ * A lazy is_null evaluation.
+ *
+ * @param mixed $var
+ *
+ * @return Closure():bool
+ */
+function isnull($var): Closure
+{
+    return static function () use ($var): bool {
+        return $var === null;
+    };
+}
+
+/**
+ * Returns a Closure that concatenates two strings using the given separator.
+ *
+ * @param string $separator
+ *
+ * @return Closure(string, string|false|null): string
+ */
+function concat(string $separator = ''): Closure
+{
+    return
+        /**
+         * @param string $a
+         * @param string|false|null $b
+         * @return string
+         */
+        static function (string $a, $b) use ($separator): string {
+            if ($b === false || $b === null) {
+                return $a;
+            }
+
+            return "{$a}{$separator}{$b}";
+        };
+}
+
+/**
+ * Lazily evaluate a function.
+ *
+ * @template T
+ * @param callable(...mixed): T $callable
+ * @param array $args
+ * @return Closure(): T
+ */
+function lazy(callable $callable, ...$args): Closure
+{
+    return
+        /**
+         * @return mixed
+         * @psalm-return T
+         */
+        static function () use ($callable, $args) {
+            /** @psalm-suppress MixedArgument */
+            return call($callable, ...$args);
+        };
+}
+
+/**
+ * A call_user_func alias.
+ *
+ * @template T
+ * @param callable(mixed...): T $callable
+ * @param array $args
+ * @return mixed
+ * @psalm-return T
+ */
+function call(callable $callable, ...$args)
+{
+    /** @psalm-var T */
+    return call_user_func_array($callable, $args);
+}
+
+/**
+ * Pipes functions calls.
+ *
+ * @param callable[] $callbacks
+ * @return Closure
+ */
+function pipe(array $callbacks): Closure
+{
+    return
+        /**
+         * @param mixed|null $initial
+         * @return mixed
+         */
+        static function ($initial = null) use ($callbacks) {
+            return array_reduce(
+                $callbacks,
+                /**
+                 * @param mixed $result
+                 * @param callable $callback
+                 * @return mixed
+                 */
+                static function ($result, callable $callback) {
+                    return $callback($result);
+                },
+                $initial
+            );
+        };
+}
+
+/**
+ * Pipes callbacks until null is reached,
+ * it returns the last non-null value
+ *
+ * @param callable[] $callbacks
+ * @return Closure
+ */
+function conduit(array $callbacks): Closure
+{
+    return
+        /**
+         * @param mixed|null $initial
+         * @return mixed
+         */
+        static function ($initial = null) use ($callbacks) {
+            /** @var mixed $value */
+            $value = $initial;
+            /** @var mixed $last */
+            $last = $value;
+
+            foreach ($callbacks as $callback) {
+                /** @var mixed $value */
+                $value = $callback($value);
+
+                if ($value === null) {
+                    return $last;
+                }
+
+                /** @var mixed $last */
+                $last = $value;
+            }
+
+            return $last;
+        };
+}
+
+/**
+ * Returns a lazy version of concat.
+ *
+ * @param string $separator
+ *
+ * @return Closure(string|false|null):(Closure(string):string)
+ */
+function lconcat(string $separator = ''): Closure
+{
+    return
+        /**
+         * @param string|false|null $b
+         * @return Closure(string): string
+         */
+        static function ($b) use ($separator): Closure {
+            return static function (string $a) use ($separator, $b): string {
+                return concat($separator)($a, $b);
+            };
+        };
 }
 
 function to_int($x): int {
@@ -149,50 +566,6 @@ function to_string($x): string {
 
 function lto_string(): Closure {
     return fn($x) => to_string($x);
-}
-
-function to_timestamp(int $x): string {
-    return date('Y-m-d H:i:s', $x);
-}
-
-function lto_timestamp(): Closure {
-    return fn($x) => to_timestamp($x);
-}
-
-function ltake_col($key): Closure {
-    return fn($x) => array_column($x, $key);
-}
-
-function lhead(): Closure {
-    return fn($x) => f\head($x);
-}
-
-function lmax(...$args): Closure {
-    return fn($x) => max(f\flatten([$x, $args]));
-}
-
-function lmin(...$args): Closure {
-    return fn($x) => min(f\flatten([$x, $args]));
-}
-
-function bound_val($x, $lower_bound, $upper_bound): Closure {
-    return f\pipe([
-        lmax($lower_bound),
-        lmin($upper_bound)
-    ])($x);
-}
-
-function lbound_val($lower_bound, $upper_bound): Closure {
-    return fn($x) => bound_val($x, $lower_bound, $upper_bound);
-}
-
-function larray_keys($search_value = false, bool $strict = false): Closure {
-    if ($search_value) return fn($x) => array_keys($x, $search_value, $strict);
-    return fn($x) => array_keys($x);
-}
-
-function larray_filter(callable $predicate): Closure {
-    return fn($x) => array_filter($x, $predicate);
 }
 
 /* bind_error :: callable -> { status : string, result : any } -> any */
@@ -229,239 +602,6 @@ function lbind_error(callable $f): Closure {
     return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
 }
 
-/* find_keys_where :: array -> predicate -> array */
-function find_keys_where(array $a, callable $predicate): array {
-    return f\pipe([
-        larray_filter($predicate),
-        larray_keys()
-    ])($a);
-}
-
-/* lfind_keys_where :: predicate -> (array -> array) */
-function lfind_keys_where(callable $predicate): Closure {
-    return fn($x) => find_keys_where($x, $predicate);
-}
-
-/* locate :: array -> predicate -> { key : string|int, value :  any } */
-function locate(array $a, callable $predicate): array {
-    $filtered = array_filter($a, $predicate);
-
-    $key = f\pipe([
-        larray_keys(),
-        lhead()
-    ])($filtered);
-
-    $value = f\head($filtered);
-
-    return [ $key, $value ];
-}
-
-/* llocate
- * :: predicate -> (array -> predicate -> { key : string|int, value :  any }) */
-function llocate(callable $predicate): Closure {
-    return fn($x) => locate($x, $predicate);
-}
-
-/* is_associative :: array -> bool */
-function is_associative(array $a): bool {
-    $count_of_string_keys_in_array = f\pipe([
-        larray_keys(),
-        f\lfilter(fn($x) => is_string($x)),
-        fn($x) => count($x),
-    ])($a);
-    return $count_of_string_keys_in_array > 0;
-}
-
-/* lis_associative :: () -> (array -> bool) */
-function lis_associative(): Closure {
-    return fn($x) => is_associative($x);
-}
-
-/* extract_element_from_list_where_contained_key_value_matches
- * :: array -> key -> predicate -> assoc */
-function extract_element_from_list_where_contained_key_value_matches(
-    array $list,
-    $key,
-    callable $predicate
-): array {
-    $is_our_element
-        = function ($x) use ($key, $predicate) {
-            if (!is_associative($x)) return [];
-            return $predicate($x[$key]);
-        };
-
-    $element = f\find($list, $is_our_element);
-
-    if ($element === null) return [];
-    return $element;
-}
-
-/* extract_element_from_list_by_contained_key_value
- * :: array -> key -> any -> assoc */
-function extract_element_from_list_by_contained_key_value(
-    array $list,
-    $key,
-    $target_value
-): array {
-    $target_value_type = gettype($target_value);
-
-    $is_our_element
-        = function ($x) use ($key, $target_value, $target_value_type) {
-            if (!is_associative($x)) return [];
-            settype($x[$key], $target_value_type);
-            return $x[$key] === $target_value;
-        };
-
-    $element = f\find($list, $is_our_element);
-
-    if ($element === null) return [];
-    return $element;
-}
-
-/* lextract_element_from_list_by_contained_key_value
- * :: key -> any -> (array -> array) */
-function lextract_element_from_list_by_contained_key_value(
-    $key,
-    $target_value
-): Closure {
-    return fn($x) => extract_element_from_list_by_contained_key_value(
-                        $x,
-                        $key,
-                        $target_value);
-}
-
-/* element_with_key_value_exists_in_list
- * :: array -> key -> any -> bool */
-function element_with_key_value_exists_in_list(
-    array $list,
-    $key,
-    $target_value
-): bool {
-    $is_our_element
-        = llist_element_contains_key_value($key, $target_value);
-
-    return f\pipe([
-        f\lfilter($is_our_element),
-        f\not(lempty())
-    ])($list);
-}
-
-/* lelement_with_key_value_exists_in_list
- * :: key -> any -> (array -> bool) */
-function lelement_with_key_value_exists_in_list(
-    $key,
-    $target_value
-): Closure {
-    return fn($x) => element_with_key_value_exists_in_list(
-                        $x,
-                        $key,
-                        $target_value);
-}
-
-/* get_first_index_where_element_contains_key_value
- * :: array -> string -> any -> int */
-function get_first_index_where_element_contains_key_value(
-    array $list,
-    $key,
-    $target_value
-) {
-    $is_our_element
-        = llist_element_contains_key_value($key, $target_value);
-
-    return f\pipe([
-        f\lfilter($is_our_element),
-        larray_keys(),
-        lhead()
-    ])($list);
-}
-
-/* lget_first_index_where_element_contains_key_value
- * :: string -> any -> (array -> int) */
-function lget_first_index_where_element_contains_key_value(
-    $key,
-    $target_value
-): Closure {
-    return
-        fn($x) => get_first_index_where_element_contains_key_value(
-                    $x,
-                    $key,
-                    $target_value);
-}
-
-/* lempty :: () -> (any -> bool) */
-function lempty(): Closure {
-    return fn($x) => empty($x);
-}
-
-/* list_element_contains_key_value :: array -> string -> any -> bool */
-function list_element_contains_key_value(
-    array $element,
-    $key,
-    $target_value
-): bool {
-    $target_value_type = gettype($target_value);
-
-    $is_associative
-        = fn($a) => count(f\filter(array_keys($a), 'is_string')) > 0;
-
-    if (!$is_associative($element)) return [];
-
-    settype($element[$key], $target_value_type);
-    return $element[$key] === $target_value;
-}
-
-/* llist_element_contains_key_value
- * :: string -> any -> (array -> string -> any -> bool) */
-function llist_element_contains_key_value(
-    $key,
-    $target_value
-): Closure {
-    return
-        fn($x) => list_element_contains_key_value(
-                    $x,
-                    $key,
-                    $target_value);
-}
-
-/* larray_merge :: Variadic array -> (array -> array) */
-function larray_merge(...$a): Closure {
-    return fn($x) => array_merge($x, ...$a);
-}
-
-/* sum_array_key_values :: Variadic array -> array */
-function sum_array_key_values(...$arrays): array {
-    $res = array_merge_recursive(...$arrays);
-
-    foreach($res as $index => $x)
-        if (is_array($x)) $res[$index] = array_sum($x);
-
-    return $res;
-}
-
-/* inspect :: any -> any
- * !impure: prints to stdout */
-function inspect($x) {
-    var_dump($x);
-    return $x;
-}
-
-/* linspect :: () -> (any -> any) */
-function linspect(): Closure {
-    return fn($x) => inspect($x);
-}
-
-/* print_out :: any -> any
- * !impure: prints to stdout */
-function print_out($r, $x) {
-    echo $x;
-    return $r;
-}
-
-/* lprint_out :: () -> (any -> any) */
-function lprint_out($x): Closure {
-    return fn($r) => print_out($r, $x);
-}
-
 /* is_null_unset_or_empty :: any -> bool */
 function is_null_unset_or_empty($x): bool {
     return ($x === null || empty($x) || !isset($x));
@@ -472,160 +612,21 @@ function lis_null_unset_or_empty(): Closure {
     return fn($x) => is_null_unset_or_empty($x);
 }
 
-/* update_key_val :: array -> key -> callable/1 -> array */
-function update_key_val(array $a, $key, callable $f): array {
-    $old_val = $a[$key];
-    $a[$key] = $f($old_val);
-    return $a;
+function bound_val($x, $lower_bound, $upper_bound): Closure {
+    return pipe([
+        lmax($lower_bound),
+        lmin($upper_bound)
+    ])($x);
 }
 
-/* lupdate_key_val :: key -> callable/1 -> (array -> array) */
-function lupdate_key_val($key, callable $f): Closure {
-    return fn($a) => update_key_val($a, $key, $f);
+function lbound_val($lower_bound, $upper_bound): Closure {
+    return fn($x) => bound_val($x, $lower_bound, $upper_bound);
 }
 
-/* update_nested_key_val :: array -> array -> callable/1 -> array */
-function update_nested_key_val(array $a, array $keys, callable $f): array {
-    if (count($keys) === 0) return $f($a);
-    [$first_key, $rest_of_keys] = f\uncons($keys);
-    $f_prime = lupdate_nested_key_val($rest_of_keys, $f);
-    return update_key_val($a, $first_key, $f_prime);
+function lmax(...$args): Closure {
+    return fn($x) => max(flatten([$x, $args]));
 }
 
-/* lupdate_nested_key_val :: array -> callable/1 -> (array -> array) */
-function lupdate_nested_key_val(array $keys, callable $f): Closure {
-    return fn($a) => update_nested_key_val($a, $keys, $f);
+function lmin(...$args): Closure {
+    return fn($x) => min(flatten([$x, $args]));
 }
-
-/**
- * Splits an array into an array of keys, and an array of values
- *
- * split_array_key_vals :: array -> [ array, array ]
- */
-function split_array_key_vals(array $a): array {
-    $keys = array_keys($a);
-    $vals = array_values($a);
-    return [ $keys, $vals ];
-}
-
-/* lsplit_array_key_vals :: () -> (array -> [ array, array ]) */
-function lsplit_array_key_vals(): Closure {
-    return fn($x) => split_array_key_vals($x);
-}
-
-/* array_contains_key_vals :: array -> array -> bool */
-function array_contains_key_vals(array $a, array $key_vals): bool {
-    $key_value_pair_matches
-        = fn($key_name) =>
-        array_key_exists($key_name, $a)
-            && ($a[$key_name] === $key_vals[$key_name]);
-
-    return f\pipe([
-        larray_keys(),
-        lis_true_for_all_elements($key_value_pair_matches),
-    ])($key_vals);
-}
-
-/* larray_contains_key_vals :: array -> (array -> bool) */
-function larray_contains_key_vals(array $key_vals): Closure {
-    return fn($a) => array_contains_key_vals($a, $key_vals);
-}
-
-/* is_true_for_all_elements :: array -> predicate -> bool */
-function is_true_for_all_elements(array $a, callable $predicate): bool {
-    return f\fold( $a, true,
-            fn($all_match, $elem) =>
-                ($all_match == true && $predicate($elem)));
-}
-
-/* lis_true_for_all_elements :: predicate -> (array -> bool) */
-function lis_true_for_all_elements(callable $predicate): Closure {
-    return fn($a) => is_true_for_all_elements($a, $predicate);
-}
-
-/* is_true_for_some_element :: array -> predicate -> bool */
-function is_true_for_some_element(array $a, callable $predicate): bool {
-    return f\fold( $a, false,
-            fn($all_match, $elem) =>
-                ($all_match == true || $predicate($elem)));
-}
-
-/* lis_true_for_some_element :: predicate -> (array -> bool) */
-function lis_true_for_some_element(callable $predicate): Closure {
-    return fn($a) => is_true_for_some_element($a, $predicate);
-}
-
-/* extract_values_from_array :: array -> array -> array */
-function extract_values_from_array(array $a, array $keys): array {
-    return f\map($keys, fn($key) => $a[$key]);
-}
-
-/* lextract_values_from_array :: array -> (array -> array) */
-function lextract_values_from_array(array $keys): Closure {
-    return fn($a) => extract_values_from_array($a, $keys);
-}
-
-/* extract_values_from_array_into_format :: array -> array -> array
- * TODO: make this work recursively (i.e., multiple levels deep)? */
-function extract_values_from_array_into_format(
-    array $a,
-    array $key_format
-): array {
-    [$format_keys, $source_keys] = split_array_key_vals($key_format);
-    $source_values = f\map($source_keys, fn($key) => $a[$key]);
-    return array_combine($format_keys, $source_values);
-}
-
-/* lextract_values_from_array_into_format :: array -> (array -> array) */
-function lextract_values_from_array_into_format(array $key_format): Closure {
-    return fn($a) => extract_values_from_array_into_format($a, $key_format);
-}
-
-/* filter_unique_arrays :: array -> array */
-function filter_unique_arrays(array $arrays): array {
-    $serialized = array_map('serialize', $arrays);
-    $unique = array_unique($serialized);
-    return array_intersect_key($arrays, $unique);
-}
-
-/* lfilter_unique_arrays :: () -> (array -> array) */
-function lfilter_unique_arrays(): Closure {
-    return fn($a) => filter_unique_arrays($a);
-}
-
-/* each :: array -> callable -> array */
-function each(array $a, callable $f): array {
-    $results = [];
-    foreach ($a as $v) $results[] = $f($v);
-    return $results;
-}
-
-/* leach :: callable -> (array -> array) */
-function leach(callable $f): Closure {
-    return fn($a) => each($a, $f);
-}
-
-/* each_with_index :: array -> callable -> array */
-function each_with_index(array $a, callable $f): array {
-    $results = [];
-    foreach ($a as $k => $v) $results[] = $f($k, $v);
-    return $results;
-}
-
-/* leach_with_index :: callable -> (array -> array) */
-function leach_with_index(callable $f): Closure {
-    return fn($a) => each_with_index($a, $f);
-}
-
-/* map_with_index :: array -> callable -> array */
-function map_with_index(array $a, callable $f): array {
-    $agg = [];
-    foreach ($a as $k => $v) $agg[$k] = $f($k, $v);
-    return $agg;
-}
-
-/* lmap_with_index :: callable -> (array -> array) */
-function lmap_with_index(callable $f): Closure {
-    return fn($a) => each($a, $f);
-}
-

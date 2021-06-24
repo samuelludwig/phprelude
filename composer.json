@@ -1,6 +1,5 @@
 {
     "require": {
-        "leocavalcante/siler": "^1.7",
         "phpunit/phpunit": "^9.5"
     }
 }
