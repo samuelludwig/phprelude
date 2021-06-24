@@ -4,12 +4,11 @@ use Closure;
 /**
  * Sums two integers.
  *
- * @param int $a
- * @param int $b
- * @return int
+ * @param int|float $a
+ * @param int|float $b
+ * @return int|float
  */
-function sum(int $a, int $b): int
-{
+function sum($a, $b) {
     return $a + $b;
 }
 

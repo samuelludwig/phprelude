@@ -1,4 +1,6 @@
-<?php declare(strict_types=1); namespace Phprelude\Core;
+<?php declare(strict_types=1); namespace Phprelude\Enum;
+require_once __DIR__ . '/core.php';
+use \Phprelude\Core as c;
 use Closure;
 
 /**
@@ -87,7 +89,7 @@ function larray_filter(callable $predicate): Closure {
 
 /* find_keys_where :: array -> predicate -> array */
 function find_keys_where(array $a, callable $predicate): array {
-    return pipe([
+    return c\pipe([
         larray_filter($predicate),
         larray_keys()
     ])($a);
@@ -102,7 +104,7 @@ function lfind_keys_where(callable $predicate): Closure {
 function locate(array $a, callable $predicate): array {
     $filtered = array_filter($a, $predicate);
 
-    $key = pipe([
+    $key = c\pipe([
         larray_keys(),
         lhead()
     ])($filtered);
@@ -120,7 +122,7 @@ function llocate(callable $predicate): Closure {
 
 /* is_assoc:: array -> bool */
 function is_assoc(array $a): bool {
-    $count_of_string_keys_in_array = pipe([
+    $count_of_string_keys_in_array = c\pipe([
         larray_keys(),
         lfilter(fn($x) => is_string($x)),
         fn($x) => count($x),
@@ -155,7 +157,7 @@ function extract_where_key_value_matches(
 function lextract_where_key_value_matches(
     $key,
     callable $predicate
-): array {
+): Closure {
     return fn($a) => extract_where_key_value_matches($a, $key, $predicate);
 }
 
@@ -193,7 +195,7 @@ function lextract_where_key_value_equals(
                         $target_value);
 }
 
-/* element_with_key_value_exists_in_list
+/* element_with_key_value_exists
  * :: array -> key -> any -> bool */
 function element_with_key_value_exists(
     array $list,
@@ -203,9 +205,9 @@ function element_with_key_value_exists(
     $is_our_element
         = lcontains_key_value($key, $target_value);
 
-    return pipe([
+    return c\pipe([
         lfilter($is_our_element),
-        not(lempty())
+        c\not(lempty())
     ])($list);
 }
 
@@ -231,7 +233,7 @@ function get_first_index_where_element_contains_key_value(
     $is_our_element
         = lcontains_key_value($key, $target_value);
 
-    return pipe([
+    return c\pipe([
         lfilter($is_our_element),
         larray_keys(),
         lhead()
@@ -349,7 +351,7 @@ function contains_key_vals(array $a, array $key_vals): bool {
         array_key_exists($key_name, $a)
             && ($a[$key_name] === $key_vals[$key_name]);
 
-    return pipe([
+    return c\pipe([
         larray_keys(),
         lis_true_for_all_elements($key_value_pair_matches),
     ])($key_vals);
@@ -400,7 +402,7 @@ function extract_values_into_format(
     array $a,
     array $key_format
 ): array {
-    [$format_keys, $source_keys] = split_array_key_vals($key_format);
+    [$format_keys, $source_keys] = split_key_vals($key_format);
     $source_values = map($source_keys, fn($key) => $a[$key]);
     return array_combine($format_keys, $source_values);
 }
