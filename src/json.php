@@ -1,6 +1,6 @@
 <?php declare(strict_types=1); namespace Phprelude\Json;
 require_once __DIR__ . '/core.php';
-require_once __DIR__ . '/File.php';
+require_once __DIR__ . '/file.php';
 use \Phprelude\Core;
 use \Phprelude\File;
 use Closure;
