@@ -1,4 +1,8 @@
 <?php declare(strict_types=1); namespace Phprelude\Json;
+require_once __DIR__ . '/core.php';
+require_once __DIR__ . '/File.php';
+use \Phprelude\Core;
+use \Phprelude\File;
 use Closure;
 
 /* ljson_decode :: () -> (string -> array) */
@@ -16,8 +20,8 @@ function ljson_encode($pretty_print = false): Closure {
 
 /* json_file_to_array :: string -> array */
 function json_file_to_array(string $file_location): array {
-    return f\pipe([
-        lfile_get_contents(),
+    return Core\pipe([
+        File\lfile_get_contents(),
         ljson_decode()
     ])($file_location);
 }

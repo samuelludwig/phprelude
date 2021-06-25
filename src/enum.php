@@ -259,28 +259,21 @@ function lempty(): Closure {
 }
 
 /* contains_key_value :: array -> string -> any -> bool */
-function contains_key_value(
-    array $element,
-    $key,
-    $target_value
-): bool {
+function contains_key_value(array $a, $key, $target_value): bool {
     $target_value_type = gettype($target_value);
 
     $is_associative
-        = fn($a) => count(filter(array_keys($a), 'is_string')) > 0;
+        = fn($x) => count(filter(array_keys($x), 'is_string')) > 0;
 
-    if (!$is_associative($element)) return [];
+    if (!$is_associative($a)) return [];
 
-    settype($element[$key], $target_value_type);
-    return $element[$key] === $target_value;
+    settype($a[$key], $target_value_type);
+    return $a[$key] === $target_value;
 }
 
 /* lcontains_key_value
  * :: string -> any -> (array -> string -> any -> bool) */
-function lcontains_key_value(
-    $key,
-    $target_value
-): Closure {
+function lcontains_key_value($key, $target_value): Closure {
     return
         fn($x) => contains_key_value(
                     $x,
@@ -398,10 +391,7 @@ function lextract_values(array $keys): Closure {
 
 /* extract_values_from_array_into_format :: array -> array -> array
  * TODO: make this work recursively (i.e., multiple levels deep)? */
-function extract_values_into_format(
-    array $a,
-    array $key_format
-): array {
+function extract_values_into_format(array $a, array $key_format): array {
     [$format_keys, $source_keys] = split_key_vals($key_format);
     $source_values = map($source_keys, fn($key) => $a[$key]);
     return array_combine($format_keys, $source_values);
