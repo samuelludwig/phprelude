@@ -87,17 +87,17 @@ function larray_filter(callable $predicate): Closure {
     return fn($x) => array_filter($x, $predicate);
 }
 
-/* find_keys_where :: array -> predicate -> array */
-function find_keys_where(array $a, callable $predicate): array {
+/* extract_keys_where :: array -> predicate -> array */
+function extract_keys_where(array $a, callable $predicate): array {
     return c\pipe([
         larray_filter($predicate),
         larray_keys()
     ])($a);
 }
 
-/* lfind_keys_where :: predicate -> (array -> array) */
-function lfind_keys_where(callable $predicate): Closure {
-    return fn($x) => find_keys_where($x, $predicate);
+/* lextract_keys_where :: predicate -> (array -> array) */
+function lextract_keys_where(callable $predicate): Closure {
+    return fn($x) => extract_keys_where($x, $predicate);
 }
 
 /* locate :: array -> predicate -> { key : string|int, value :  any } */
