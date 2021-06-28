@@ -230,4 +230,10 @@ class EnumTest extends TestCase {
         $this->assertSame('foobarbaz', Enum\ljoin()($pieces));
         $this->assertSame('foo,bar,baz', Enum\ljoin(',')($pieces));
     }
+
+    public function testHasKeys() {
+        $a = ['dog' => 'yes', 'name' => 'kot'];
+        $this->assertTrue(Enum\has_keys($a, ['dog', 'name']));
+        $this->assertFalse(Enum\has_keys($a, ['dog', 'name', 'breed']));
+    }
 }

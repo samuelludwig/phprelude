@@ -829,3 +829,14 @@ function drop(array $a, int $count, bool $preserve_keys = false): array {
 function ldrop(int $count, bool $preserve_keys = false): Closure {
     return fn($a) => drop($a, $count, $preserve_keys);
 }
+
+/* has_keys :: array -> List string -> bool */
+function has_keys(array $a, array $key_names): bool {
+    return is_true_for_all_elements(
+            $key_names, fn($key) => array_key_exists($key, $a));
+}
+
+function lhas_keys(array $key_names): Closure {
+    return fn($a) => has_keys($a, $key_names);
+}
+
