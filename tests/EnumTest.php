@@ -233,6 +233,7 @@ class EnumTest extends TestCase {
 
     public function testHasKeys() {
         $a = ['dog' => 'yes', 'name' => 'kot'];
+        $this->assertTrue(Enum\has_keys($a, ['name']));
         $this->assertTrue(Enum\has_keys($a, ['dog', 'name']));
         $this->assertFalse(Enum\has_keys($a, ['dog', 'name', 'breed']));
     }
