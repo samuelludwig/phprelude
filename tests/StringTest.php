@@ -15,4 +15,11 @@ class StringTest extends TestCase {
         $this->assertSame('foo', $concat('foo', null));
     }
 
+
+    public function testSubstringExists() {
+        $this->assertTrue(Str\substring_exists('dog', 'o'));
+        $this->assertTrue(Str\substring_exists('dog', 'dog'));
+        $this->assertFalse(Str\substring_exists('dog', 'c'));
+        $this->assertFalse(Str\substring_exists('dog', 'cog'));
+    }
 }

@@ -46,3 +46,12 @@ function lconcat(string $separator = ''): Closure
         };
 }
 
+/* substring_exists :: string -> string -> bool */
+function substring_exists(string $haystack, string $needle): bool {
+    return strpos($haystack, $needle) !== false;
+}
+
+function lsubstring_exists(string $needle): Closure {
+    return fn($s) => substring_exists($s, $needle);
+}
+
