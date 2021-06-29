@@ -548,6 +548,18 @@ function lfold($initial, callable $callback): Closure {
     return fn($x) => fold($x, $initial, $callback);
 }
 
+/* right-fold */
+function foldr(array $list, $initial, callable $callback) {
+    return c\pipe([
+        larray_reverse(),
+        lfold($initial, $callback),
+    ])($list);
+}
+
+function lfoldr($initial, callable $callback) {
+    return fn($x) => foldr($x, $initial, $callback);
+}
+
 /**
  * Returns the first element on a list after it is sorted. It is a head(sort()) alias.
  *
@@ -842,10 +854,7 @@ function lhas_keys(array $key_names): Closure {
 
 /* merge_preserve_keys :: Variadic array -> array */
 function merge_preserve_keys(...$arrays): array {
-    return c\pipe([
-        larray_reverse(),
-        lfold([], fn($a1, $a2) => $a1 + $a2),
-    ])($arrays);
+    return foldr($arrays, [], fn($a1, $a2) => $a1 + $a2);
 }
 
 function lmerge_preserve_keys(): Closure {
