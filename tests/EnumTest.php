@@ -237,4 +237,12 @@ class EnumTest extends TestCase {
         $this->assertTrue(Enum\has_keys($a, ['dog', 'name']));
         $this->assertFalse(Enum\has_keys($a, ['dog', 'name', 'breed']));
     }
+
+    public function testMergePreserveKeys() {
+        $a1 = [2 => 'dog', 3 => 'cat'];
+        $a2 = [3 => 'orange', 'x' => 'door'];
+        $a3 = ['x' => 'yellow'];
+        $expected = [2 => 'dog', 3 => 'orange', 'x' => 'yellow'];
+        $this->assertEquals(Enum\merge_preserve_keys($a1, $a2, $a3), $expected);
+    }
 }

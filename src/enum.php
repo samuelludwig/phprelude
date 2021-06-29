@@ -840,3 +840,19 @@ function lhas_keys(array $key_names): Closure {
     return fn($a) => has_keys($a, $key_names);
 }
 
+/* merge_preserve_keys :: Variadic array -> array */
+function merge_preserve_keys(...$arrays): array {
+    return c\pipe([
+        larray_reverse(),
+        lfold([], fn($a1, $a2) => $a1 + $a2),
+    ])($arrays);
+}
+
+function lmerge_preserve_keys(): Closure {
+    return fn($a) => merge_preserve_keys($a);
+}
+
+function larray_reverse($preserve_keys = false): Closure {
+    return fn($a) => array_reverse($a, $preserve_keys);
+}
+
