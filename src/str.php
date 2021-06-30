@@ -58,3 +58,12 @@ function lsubstring_exists(string $needle): Closure {
 function lstr_replace($target, $replacement): Closure {
     return fn($s) => str_replace($target, $replacement, $s);
 }
+
+function lpreg_replace(
+    $target_pattern,
+    $replacement,
+    int $limit = -1
+): Closure {
+    return fn($s) => preg_replace($target_pattern, $replacement, $s, $limit);
+}
+
