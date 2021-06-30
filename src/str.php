@@ -55,3 +55,6 @@ function lsubstring_exists(string $needle): Closure {
     return fn($s) => substring_exists($s, $needle);
 }
 
+function lstr_replace($target, $replacement): Closure {
+    return fn($s) => str_replace($target, $replacement, $s);
+}
