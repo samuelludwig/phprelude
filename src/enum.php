@@ -185,25 +185,14 @@ function extract_where_key_value_equals(
 
 /* lextract_element_from_list_by_contained_key_value
  * :: key -> any -> (array -> array) */
-function lextract_where_key_value_equals(
-    $key,
-    $target_value
-): Closure {
-    return fn($x) => extract_where_key_value_equals(
-                        $x,
-                        $key,
-                        $target_value);
+function lextract_where_key_value_equals($key, $target_value): Closure {
+    return fn($x) => extract_where_key_value_equals($x, $key, $target_value);
 }
 
 /* element_with_key_value_exists
  * :: array -> key -> any -> bool */
-function element_with_key_value_exists(
-    array $list,
-    $key,
-    $target_value
-): bool {
-    $is_our_element
-        = lcontains_key_value($key, $target_value);
+function element_with_key_value_exists(array $list, $key, $target_value): bool {
+    $is_our_element = lcontains_key_value($key, $target_value);
 
     return c\pipe([
         lfilter($is_our_element),
@@ -213,14 +202,8 @@ function element_with_key_value_exists(
 
 /* lelement_with_key_value_exists_in_list
  * :: key -> any -> (array -> bool) */
-function lelement_with_key_value_exists(
-    $key,
-    $target_value
-): Closure {
-    return fn($x) => element_with_key_value_exists(
-                        $x,
-                        $key,
-                        $target_value);
+function lelement_with_key_value_exists($key, $target_value): Closure {
+    return fn($x) => element_with_key_value_exists($x, $key, $target_value);
 }
 
 /* get_first_index_where_element_contains_key_value
@@ -230,8 +213,7 @@ function get_first_index_where_element_contains_key_value(
     $key,
     $target_value
 ) {
-    $is_our_element
-        = lcontains_key_value($key, $target_value);
+    $is_our_element = lcontains_key_value($key, $target_value);
 
     return c\pipe([
         lfilter($is_our_element),
@@ -246,11 +228,9 @@ function lget_first_index_where_element_contains_key_value(
     $key,
     $target_value
 ): Closure {
-    return
-        fn($x) => get_first_index_where_element_contains_key_value(
-                    $x,
-                    $key,
-                    $target_value);
+    return fn($x) =>
+            get_first_index_where_element_contains_key_value(
+                $x, $key, $target_value);
 }
 
 /* lempty :: () -> (any -> bool) */
@@ -262,8 +242,7 @@ function lempty(): Closure {
 function contains_key_value(array $a, $key, $target_value): bool {
     $target_value_type = gettype($target_value);
 
-    $is_associative
-        = fn($x) => count(filter(array_keys($x), 'is_string')) > 0;
+    $is_associative = fn($x) => count(filter(array_keys($x), 'is_string')) > 0;
 
     if (!$is_associative($a)) return [];
 
@@ -274,11 +253,7 @@ function contains_key_value(array $a, $key, $target_value): bool {
 /* lcontains_key_value
  * :: string -> any -> (array -> string -> any -> bool) */
 function lcontains_key_value($key, $target_value): Closure {
-    return
-        fn($x) => contains_key_value(
-                    $x,
-                    $key,
-                    $target_value);
+    return fn($x) => contains_key_value($x, $key, $target_value);
 }
 
 /* larray_merge :: Variadic array -> (array -> array) */
