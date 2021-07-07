@@ -12,6 +12,10 @@ function sum($a, $b) {
     return $a + $b;
 }
 
+function lsum(): Closure {
+    return fn($x, $y) => $x + $y;
+}
+
 /**
  * Sum of $left and $right.
  *
