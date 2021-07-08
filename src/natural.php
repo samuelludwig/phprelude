@@ -1,4 +1,4 @@
-<?php declare(strict_types=1); namespace Phprelude\Number;
+<?php declare(strict_types=1); namespace Phprelude\Natural;
 use Closure;
 
 /**
