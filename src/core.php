@@ -537,29 +537,8 @@ function lto_string(): Closure {
 /* bind_error :: callable -> { status : string, result : any } -> any */
 function bind_error(callable $f, array $maybe_tuple) {
     [ $status, $value ] = $maybe_tuple;
-
-    if (!is_string($status)) {
-        trigger_error(
-            __FUNCTION__
-            . ' expects the first value of $maybe_tuple to be a string; '
-            . gettype($status)
-            . ' given'
-            , E_PARSE);
-    }
-
-    $arg_count = count($maybe_tuple);
-    if ($arg_count !== 2) {
-        trigger_error(
-            __FUNCTION__
-            . ' expects $maybe_tuple to consist of only two values, a $status'
-            . ' string, and a value (or array of values); '
-            . $arg_count
-            . ' given'
-            , E_PARSE);
-    }
-
     if ($status === ':error') return $maybe_tuple;
-    return $f($value);
+    return [ ':ok', $f($value) ];
 }
 
 /* lbind_error
