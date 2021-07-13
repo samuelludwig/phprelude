@@ -8,6 +8,25 @@ use \Phprelude\Str;
 
 class CoreTest extends TestCase {
 
+    public function testBindError() {
+        $f_no_err = fn($x) => [ ':ok', -$x ];
+        $f_with_err = fn($x) => [ ':error', "Error with input: $x" ];
+
+        $result = c\pipe([
+            c\lbind_error($f_no_err),
+            c\lbind_error($f_no_err),
+        ])(1);
+        $expected = [ ':ok', 1 ];
+        $this->assertEquals($expected, $result);
+
+        $result = c\pipe([
+            c\lbind_error($f_no_err),
+            c\lbind_error($f_with_err),
+            c\lbind_error($f_no_err),
+        ])(1);
+        $expected = [ ':error', 'Error with input: -1' ];
+        $this->assertEquals($expected, $result);
+    }
 
     public function testPartial()
     {

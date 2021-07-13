@@ -535,16 +535,21 @@ function lto_string(): Closure {
 }
 
 /* bind_error :: callable -> { status : string, result : any } -> any */
-function bind_error(callable $f, array $maybe_tuple) {
+function bind_error(callable $f, $maybe) {
+    $is_maybe_tuple
+        = fn($x) => ( is_array($x) && ($x[0] === ':error' || $x[0] === ':ok') );
+
+    $maybe_tuple = $is_maybe_tuple($maybe) ? $maybe : [ ':ok', $maybe ];
+
     [ $status, $value ] = $maybe_tuple;
     if ($status === ':error') return $maybe_tuple;
-    return [ ':ok', $f($value) ];
+    return $f($value);
 }
 
 /* lbind_error
  * :: callable -> (callable -> [ status :: string, result :: any ] -> any) */
 function lbind_error(callable $f): Closure {
-    return fn($maybe_tuple) => bind_error($f, $maybe_tuple);
+    return fn($maybe) => bind_error($f, $maybe);
 }
 
 /* is_null_unset_or_empty :: any -> bool */
