@@ -71,6 +71,67 @@ class EnumTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
+    public function testExtractKeysWhere() {
+        $array = ['dog' => 0, 'cat' => 65, 'orange' => 5];
+        $result = Enum\extract_keys_where($array, fn($x) => $x > 6);
+        $expected = ['cat'];
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testExtractWhereKeyValue() {
+        $array
+            = [ ['x' => 1, 'y' => 1]
+              , ['x' => 2, 'y' => 2]
+              , ['x' => 3, 'y' => 3]
+              ];
+
+        $result
+            = Enum\extract_where_key_value_matches(
+                $array, 'x', fn($x) => $x >= 2);
+
+        $expected = ['x' => 2, 'y' => 2];
+        $this->assertEquals($expected, $result);
+
+        $result = Enum\extract_where_key_value_equals($array, 'x', 2);
+        $expected = ['x' => 2, 'y' => 2];
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testExtractKeyVal() {
+        $array = ['my_name' => 'me', 'my_age' => 65, 'dogs_name' => 'cat'];
+
+        $result = Enum\extract_key_val($array, 'my_age');
+        $expected = 65;
+        $this->assertEquals($expected, $result);
+
+        $array
+            = [ 'me' => ['my_name' => 'me', 'my_age' => 65]
+              , 'dogs_name' => 'cat'
+              ];
+        $result = Enum\extract_nested_key_val($array, ['me', 'my_age']);
+        $expected = 65;
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testUpdateKeyVal() {
+        $array = ['my_name' => 'me', 'my_age' => 65, 'dogs_name' => 'cat'];
+
+        $result = Enum\update_key_val($array, 'my_age', fn($x) => $x + 1);
+        $expected = ['my_name' => 'me', 'my_age' => 66, 'dogs_name' => 'cat'];
+        $this->assertEquals($expected, $result);
+
+        $array
+            = [ 'me' => ['my_name' => 'me', 'my_age' => 65]
+              , 'dogs_name' => 'cat'
+              ];
+        $result = Enum\update_nested_key_val($array, ['me', 'my_age'], fn($x) => $x + 1);
+        $expected
+            = [ 'me' => ['my_name' => 'me', 'my_age' => 66]
+              , 'dogs_name' => 'cat'
+              ];
+        $this->assertEquals($expected, $result);
+    }
+
     public function testFilterUniqueArrays() {
         $arrays
             = [ ['a' => 'b', 'c' => 'd', 'e' => ['f', 'g']]

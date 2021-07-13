@@ -284,7 +284,7 @@ function lupdate_key_val($key, callable $f): Closure {
 }
 
 /* update_nested_key_val :: array -> array -> callable/1 -> array */
-function update_nested_key_val(array $a, array $keys, callable $f): array {
+function update_nested_key_val($a, array $keys, callable $f) {
     if (count($keys) === 0) return $f($a);
     [$first_key, $rest_of_keys] = uncons($keys);
     $f_prime = lupdate_nested_key_val($rest_of_keys, $f);
@@ -307,11 +307,11 @@ function lextract_key_val($key) {
 }
 
 /* extract_nested_key_val :: array -> array -> callable/1 -> array */
-function extract_nested_key_val(array $a, array $keys): array {
+function extract_nested_key_val($a, array $keys) {
     if (count($keys) === 0) return $a;
     [$first_key, $rest_of_keys] = uncons($keys);
-    $f_prime = lextract_nested_key_val($rest_of_keys);
-    return extract_key_val($a, $first_key);
+    $remainder = $a[$first_key];
+    return extract_nested_key_val($remainder, $rest_of_keys);
 }
 
 /* lextract_nested_key_val :: array -> callable/1 -> (array -> array) */
