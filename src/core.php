@@ -534,12 +534,20 @@ function lto_string(): Closure {
     return fn($x) => to_string($x);
 }
 
-/* bind_error :: callable -> { status : string, result : any } -> any */
-function bind_error(callable $f, $maybe) {
-    $is_maybe_tuple
-        = fn($x) => ( is_array($x) && ($x[0] === ':error' || $x[0] === ':ok') );
+function is_maybe_tuple($x): bool {
+    return
+        is_array($x)
+        && count($x) === 2
+        && ($x[0] === ':error' || $x[0] === ':ok');
+}
 
-    $maybe_tuple = $is_maybe_tuple($maybe) ? $maybe : [ ':ok', $maybe ];
+function lis_maybe_tuple(): Closure {
+    return fn($x) => is_maybe_tuple($x);
+}
+
+/* bind_error :: callable -> Maybe any -> any */
+function bind_error(callable $f, $maybe) {
+    $maybe_tuple = is_maybe_tuple($maybe) ? $maybe : [ ':ok', $maybe ];
 
     [ $status, $value ] = $maybe_tuple;
     if ($status === ':error') return $maybe_tuple;
