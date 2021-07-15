@@ -19,6 +19,75 @@ function require_directory($path) {
     return ':ok';
 }
 
+/* -- impure: Adds a definition to the parent namespace */
+/* Allowed types:
+ *   'array', 'bool', 'callable', 'int', 'float',
+ *   'object', 'resource', 'string', 'null', 'mixed',
+ *   <any other struct> */
+function defstruct($struct_name, $struct): array {
+    /* Validate types given */
+    if (!is_struct($struct))
+        trigger_error('Invalid type provided to '.__FUNCTION__, E_USER_ERROR);
+    define($struct_name, $struct);
+    return [ ':ok', true ];
+}
+
+function is_type($type_name, $x): bool {
+    $matches_struct_pattern = function() use ($type_name, $x) {
+        $matches = true;
+        foreach (constant($type_name) as $key => $type_list) {
+            $matches
+                = $matches
+                && Enum\is_true_for_some_element(
+                    $type_list, fn($t) => is_type($t, $x[$key]));
+        }
+    };
+    /* Check that $x contains all the keys of the struct -- recursively */
+    /* Check that the value of each key matches at least one of the possible
+     * types for that key in the struct */
+    /* For each key_val, compile list of possible types, and then run
+     * is_<type>/is_type(<struct_name>, ...) until a true is reached, or options
+     * are exausted, in which case return false. */
+    return match ($type_name) {
+        'array' => is_array($x),
+        'bool' => is_bool($x),
+        'callable' => is_callable($x),
+        'int' => is_int($x),
+        'float' => is_float($x),
+        'object' => is_object($x),
+        'resource' => is_resource($x),
+        'string' => is_string($x),
+        'null' => is_null($x),
+        'mixed' => true,
+        default => $matches_struct_pattern
+    };
+}
+
+/* A struct is an array where the value for each key is a list of valid types. */
+function is_struct($t): bool {
+    if (!Enum\is_assoc($t)) return false;
+
+    $core_types
+        = [ 'array', 'bool', 'callable', 'int', 'float', 'object', 'resource'
+          , 'string', 'null', 'mixed' ];
+
+    $valid_types
+        = array_merge(
+            $core_types, array_keys(get_defined_constants(true)['user']));
+
+    /* $value will either be a sub-array or a list of one or more valid types. */
+    foreach ($t as $value) {
+        if (Enum\is_assoc($value) && !is_struct($value)) return false;
+
+        $contains_only_valid_types
+            = Enum\is_true_for_all_elements(
+                $value, fn($type) => in_array($type, $valid_types));
+        if (!$contains_only_valid_types) return false;
+    }
+
+    return true;
+}
+
 /**
  * Identity function.
  *
