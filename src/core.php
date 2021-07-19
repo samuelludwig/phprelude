@@ -25,24 +25,47 @@ function require_directory($path) {
  *   'object', 'resource', 'string', 'null', 'mixed',
  *   <any other struct> */
 function defstruct($struct_name, $struct): array {
-    /* TODO: Expand key-values into a tuple of two arrays: one containing valid
-     * types, the other, default values for a constructor function. */
     /* Validate types given */
     if (!is_struct($struct))
         trigger_error('Invalid type provided to '.__FUNCTION__, E_USER_ERROR);
-    /* TODO Append a mk function to the struct */
+
     define($struct_name, $struct);
     return [ ':ok', true ];
 }
 
-function is_type($type_name, $x): bool {
+function mk(string $struct_name, array $key_vals = []): array {
+    $our_struct = constant($struct_name);
+    $defaults = [];
+
+    foreach ($our_struct as $key => $value) {
+        if (!isset($value[1])) continue;
+        $defaults[$key] = $value[1];
+    }
+
+    $result = array_merge($defaults, $key_vals);
+
+    if (!is_type($struct_name, $result))
+        trigger_error('Struct is not complete', E_USER_ERROR);
+
+    return $result;
+}
+
+function mkstruct(string $struct_name, array $key_vals = []): array {
+    return mk($struct_name, $key_vals);
+}
+
+
+function is_type(string $type_name, $x): bool {
     $matches_struct_pattern = function() use ($type_name, $x) {
         $matches = true;
-        foreach (constant($type_name) as $key => $type_list) {
+
+        $target_struct = constant($type_name);
+
+        foreach ($target_struct as $key => $type_list) {
             $matches
                 = $matches
                 && Enum\is_true_for_some_element(
-                    $type_list, fn($t) => is_type($t, $x[$key]));
+                    $type_list[0], fn($t) => is_type($t, $x[$key]));
         }
         return $matches;
     };
@@ -85,7 +108,7 @@ function is_struct($t): bool {
 
         $contains_only_valid_types
             = Enum\is_true_for_all_elements(
-                $value, fn($type) => in_array($type, $valid_types));
+                $value[0], fn($type) => in_array($type, $valid_types));
         if (!$contains_only_valid_types) return false;
     }
 
