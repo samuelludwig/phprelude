@@ -87,4 +87,21 @@ class CoreTest extends TestCase {
             ])('foo')
         );
     }
+
+    public function testDefStruct() {
+        c\defstruct(
+            'User',
+            [ 'name' => ['string'], 'age' => ['string', 'int', 'float'] ]);
+        $our_user = ['name' => 'me', 'age' => 65];
+        $bad_user = ['name' => 'me', 'age' => false];
+        $this->assertTrue(c\is_type('User', $our_user));
+        $this->assertFalse(c\is_type('User', $bad_user));
+
+        c\defstruct('Account', [ 'id' => ['int'], 'user' => ['User'] ]);
+        $our_account = [ 'id' => 1, 'user' => $our_user ];
+        $bad_account = [ 'id' => 1, 'user' => $bad_user ];
+        $this->assertTrue(c\is_type('Account', $our_account));
+        $this->assertFalse(c\is_type('Account', $bad_account));
+    }
 }
+

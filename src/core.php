@@ -25,6 +25,8 @@ function require_directory($path) {
  *   'object', 'resource', 'string', 'null', 'mixed',
  *   <any other struct> */
 function defstruct($struct_name, $struct): array {
+/* TODO: Expand key-values into a tuple of two arrays: one containing valid
+ * types, the other, default values for a constructor function. */
     /* Validate types given */
     if (!is_struct($struct))
         trigger_error('Invalid type provided to '.__FUNCTION__, E_USER_ERROR);
@@ -41,6 +43,7 @@ function is_type($type_name, $x): bool {
                 && Enum\is_true_for_some_element(
                     $type_list, fn($t) => is_type($t, $x[$key]));
         }
+        return $matches;
     };
     /* Check that $x contains all the keys of the struct -- recursively */
     /* Check that the value of each key matches at least one of the possible
@@ -59,7 +62,7 @@ function is_type($type_name, $x): bool {
         'string' => is_string($x),
         'null' => is_null($x),
         'mixed' => true,
-        default => $matches_struct_pattern
+        default => $matches_struct_pattern()
     };
 }
 
