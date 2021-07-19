@@ -25,11 +25,12 @@ function require_directory($path) {
  *   'object', 'resource', 'string', 'null', 'mixed',
  *   <any other struct> */
 function defstruct($struct_name, $struct): array {
-/* TODO: Expand key-values into a tuple of two arrays: one containing valid
- * types, the other, default values for a constructor function. */
+    /* TODO: Expand key-values into a tuple of two arrays: one containing valid
+     * types, the other, default values for a constructor function. */
     /* Validate types given */
     if (!is_struct($struct))
         trigger_error('Invalid type provided to '.__FUNCTION__, E_USER_ERROR);
+    /* TODO Append a mk function to the struct */
     define($struct_name, $struct);
     return [ ':ok', true ];
 }
