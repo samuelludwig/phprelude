@@ -90,6 +90,16 @@ function is_type(string $type_name, $x): bool {
     };
 }
 
+function enforce_type(string $type_name, $x): array {
+    if (!is_type($type_name, $x)) {
+        trigger_error(
+            'Incorrect type given, expected type $type_name, instead received: '
+                . json_encode($x, JSON_PRETTY_PRINT),
+            E_USER_ERROR);
+    }
+    return [ ':ok', true ];
+}
+
 /* A struct is an array where the value for each key is a list of valid types. */
 function is_struct($t): bool {
     if (!Enum\is_assoc($t)) return false;
