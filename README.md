@@ -52,7 +52,7 @@ if one was not provided in the constructor function.
 When a struct is defined using `defstruct`, a constant, named using the provided
 name of the struct, is created and set to the value of the structs layout. Note
 that this means `defstruct` is *impure*, because you will be adding constants to
-the module namespace!
+the global namespace!
 
 After declaration, a struct can be constructed using the `Core\mk` function,
 which takes the name of the struct, and an associative array. Fields with
