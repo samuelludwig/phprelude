@@ -63,7 +63,7 @@ the resulting array does not match the type of the struct.
 NOTE: At the moment, a struct, after definition, can have a superset of the
 fields in its layout, and still be considered the same "type".
 
-An example struct definition--and subsequent construction might look like:
+An example struct definition (and subsequent construction) might look like:
 
 ```php
 <?php declare(strict_types=1); namespace StructTest;
