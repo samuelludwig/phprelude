@@ -82,3 +82,10 @@ $user1 = p\mk('User', ['id' => 1, 'name' => 'Mike']);
 echo json_encode($user0) . "\n"; // {"id":0,"name":"John"}
 echo json_encode($user1) . "\n"; // {"id":1,"name":"Mike"}
 ```
+
+## Wants and Desires
+
+- [ ] Type aliases (i.e. type definitions that don't need to be within an
+      associative array (i.e. struct))
+- [ ] Add ability to use guard clauses with type definitions, for example, some
+      way to write `int > 2`
