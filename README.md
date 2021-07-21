@@ -89,3 +89,4 @@ echo json_encode($user1) . "\n"; // {"id":1,"name":"Mike"}
       associative array (i.e. struct))
 - [ ] Add ability to use guard clauses with type definitions, for example, some
       way to write `int > 2`
+- [ ] Clean up overall implementation of structs+types
