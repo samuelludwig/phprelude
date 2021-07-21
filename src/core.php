@@ -75,6 +75,17 @@ function is_type(string $type_name, $x): bool {
     /* For each key_val, compile list of possible types, and then run
      * is_<type>/is_type(<struct_name>, ...) until a true is reached, or options
      * are exausted, in which case return false. */
+    /* Check if its a typed array first */
+    $array_type_parse_attempt = explode('array:', $type_name);
+    $is_typed_array
+        = count($array_type_parse_attempt) === 2
+        && $array_type_parse_attempt[1] !== '';
+    if ($is_typed_array) {
+        $array_type = trim($array_type_parse_attempt[1]);
+        return Enum\is_true_for_all_elements($x, fn($x) => is_type($array_type, $x));
+    }
+
+    if (count(explode('array:', $type_name)))
     return match ($type_name) {
         'array' => is_array($x),
         'bool' => is_bool($x),

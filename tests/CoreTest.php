@@ -107,5 +107,12 @@ class CoreTest extends TestCase {
         $this->assertEquals(['id' => 2, 'user' => $our_user], $built_user);
     }
 
+    public function testIsType() {
+        $this->assertTrue(c\is_type('string', '1'));
+        $this->assertFalse(c\is_type('int', '1'));
+
+        $this->assertTrue(c\is_type('array:int', [1, 2, 3]));
+        $this->assertFalse(c\is_type('array:string', [1, 2, 3]));
+    }
 }
 
