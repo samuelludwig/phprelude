@@ -85,10 +85,10 @@ echo json_encode($user1) . "\n"; // {"id":1,"name":"Mike"}
 
 ## Wants and Desires
 
-- [ ] Type aliases (i.e. type definitions that don't need to be within an
-      associative array (i.e. struct))
+- [ ] Type aliases, i.e. non-struct type definitions, ex: `Num = ['int','float']`
 - [ ] Add ability to use guard clauses with type definitions, for example, some
-      way to write `int > 2`
+      way to write `BigNat = int > 1000` (Type "BigNat" corresponds to an int
+      with a value greater than 1000)
 - [ ] Clean up overall implementation of structs+types
 - [ ] Add a "strict" version of type-checking for structs, which *doesn't* accept
       extra fields that aren't in the initial struct
