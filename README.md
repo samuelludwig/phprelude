@@ -90,3 +90,7 @@ echo json_encode($user1) . "\n"; // {"id":1,"name":"Mike"}
 - [ ] Add ability to use guard clauses with type definitions, for example, some
       way to write `int > 2`
 - [ ] Clean up overall implementation of structs+types
+- [ ] Add a "strict" version of type-checking for structs, which *doesn't* accept
+      extra fields that aren't in the initial struct
+- [ ] Make this library usable as a composer package, in addition to the current
+      method of use

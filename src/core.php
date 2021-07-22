@@ -50,10 +50,18 @@ function mk(string $struct_name, array $key_vals = []): array {
     return $result;
 }
 
+function lmk(string $struct_name): Closure {
+    return fn($a) => mk($struct_name, $a);
+}
+
+/* Alias for mk */
 function mkstruct(string $struct_name, array $key_vals = []): array {
     return mk($struct_name, $key_vals);
 }
 
+function lmkstruct(string $struct_name): Closure {
+    return fn($a) => mk($struct_name, $a);
+}
 
 function is_type(string $type_name, $x): bool {
     $matches_struct_pattern = function() use ($type_name, $x) {
@@ -101,14 +109,22 @@ function is_type(string $type_name, $x): bool {
     };
 }
 
-function enforce_type(string $type_name, $x): array {
+function lis_type(string $type_name): Closure {
+    return fn($x) => is_type($type_name, $x);
+}
+
+function enforce_type(string $type_name, $x) {
     if (!is_type($type_name, $x)) {
         trigger_error(
             'Incorrect type given, expected type $type_name, instead received: '
                 . json_encode($x, JSON_PRETTY_PRINT),
             E_USER_ERROR);
     }
-    return [ ':ok', true ];
+    return $x;
+}
+
+function lenforce_type(string $type_name): Closure {
+    return fn($x) => enforce_type($type_name, $x);
 }
 
 /* A struct is an array where the value for each key is a list of valid types. */
