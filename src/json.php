@@ -5,13 +5,26 @@ use \Phprelude\Core;
 use \Phprelude\File;
 use Closure;
 
-/* ljson_decode :: () -> (string -> array) */
-function ljson_decode(): Closure {
+/* decode :: string -> array */
+function decode(string $x): array {
+    return json_decode($x, true);
+}
+
+/* ldecode :: () -> (string -> array) */
+function ldecode(): Closure {
     return fn($x) => json_decode($x, true);
 }
 
-/* ljson_encode :: Optional bool -> (array -> string) */
-function ljson_encode($pretty_print = false): Closure {
+/* lencode :: Optional bool -> (array -> string) */
+function encode($x, $pretty_print = false): string {
+    if ($pretty_print === true)
+        return json_encode($x, JSON_PRETTY_PRINT);
+
+    return json_encode($x);
+}
+
+/* lencode :: Optional bool -> (array -> string) */
+function lencode($pretty_print = false): Closure {
     if ($pretty_print === true)
         return fn($x) => json_encode($x, JSON_PRETTY_PRINT);
 
@@ -22,6 +35,6 @@ function ljson_encode($pretty_print = false): Closure {
 function json_file_to_array(string $file_location): array {
     return Core\pipe([
         File\lfile_get_contents(),
-        ljson_decode()
+        ldecode()
     ])($file_location);
 }
