@@ -136,13 +136,17 @@ function lenforce_type(string $type_name): Closure {
 function is_struct($t): bool {
     if (!Enum\is_assoc($t)) return false;
 
+    /* Add array_of_T in list of allowed types */
     $core_types
         = [ 'array', 'bool', 'callable', 'int', 'float', 'object', 'resource'
           , 'string', 'null', 'mixed' ];
 
-    $valid_types
+    $user_defined_constants = get_defined_constants(true)['user'];
+    $valid_atomic_types
         = array_merge(
-            $core_types, array_keys(get_defined_constants(true)['user']));
+            $core_types, array_keys($user_defined_constants));
+    $array_ofs = Enum\map($valid_atomic_types, fn($x) => "array:$x");
+    $valid_types = array_merge($valid_atomic_types, $array_ofs);
 
     /* $value will either be a sub-array or a list of one or more valid types. */
     foreach ($t as $value) {
