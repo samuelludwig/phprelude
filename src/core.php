@@ -1,6 +1,7 @@
 <?php declare(strict_types=1); namespace Phprelude\Core;
 require_once __DIR__ . '/enum.php';
 use Phprelude\Enum;
+use Phprelude\Json;
 
 /*
  * In computer science, functional programming is a programming paradigm
@@ -26,8 +27,12 @@ function require_directory($path) {
  *   <any other struct> */
 function defstruct($struct_name, $struct): array {
     /* Validate types given */
-    if (!is_struct($struct))
-        trigger_error('Invalid type provided to '.__FUNCTION__, E_USER_ERROR);
+    if (!is_struct($struct)) {
+        trigger_error(
+            'Invalid type provided to '
+                . __FUNCTION__ . ' while processing ' . $struct_name
+                . ' with input ' . Json\encode($struct, true), E_USER_ERROR);
+    }
 
     define($struct_name, $struct);
     return [ ':ok', true ];
