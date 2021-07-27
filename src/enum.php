@@ -844,3 +844,19 @@ function larray_reverse($preserve_keys = false): Closure {
     return fn($a) => array_reverse($a, $preserve_keys);
 }
 
+function is_subset_of($a, $b): bool {
+    return array_diff($a, $b) === [];
+}
+
+function lis_subset_of($b): Closure {
+    return fn($a) => is_subset_of($a, $b);
+}
+
+function is_superset_of($a, $b): bool {
+    return array_diff($b, $a) === [];
+}
+
+function lis_superset_of($b): Closure {
+    return fn($a) => is_superset_of($a, $b);
+}
+

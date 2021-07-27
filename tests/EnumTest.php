@@ -319,4 +319,26 @@ class EnumTest extends TestCase {
         $this->assertEquals($expected, Enum\lsum_key_values()($a, $b));
         $this->assertEquals($expected, Enum\lsum_key_values()(...$both));
     }
+
+    public function testIsSubsetAndSuperset() {
+        $a = [10, 20, 30];
+        $b = [10, 20, 30, 40];
+        $c = ['one' => 10, 'two' => 20, 'three' => 30];
+        $d = ['one' => 10, 'two' => 20, 'three' => 30, 'four' => 40];
+
+        $this->assertTrue(Enum\is_subset_of($a, $b));
+        $this->assertFalse(Enum\is_superset_of($a, $b));
+
+        $this->assertTrue(Enum\is_superset_of($b, $a));
+        $this->assertFalse(Enum\is_subset_of($b, $a));
+
+        $this->assertTrue(Enum\is_subset_of($c, $d));
+        $this->assertFalse(Enum\is_superset_of($c, $d));
+
+        $this->assertTrue(Enum\is_superset_of($d, $c));
+        $this->assertFalse(Enum\is_subset_of($d, $c));
+
+        $is_subset_of_b = Enum\lis_subset_of($b);
+        $this->assertTrue($is_subset_of_b($a));
+    }
 }
