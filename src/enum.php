@@ -261,7 +261,7 @@ function larray_merge(...$a): Closure {
     return fn($x) => array_merge($x, ...$a);
 }
 
-/* sum_array_key_values :: Variadic array -> array */
+/* sum_key_values :: Variadic array -> array */
 function sum_key_values(...$arrays): array {
     $res = array_merge_recursive(...$arrays);
 
@@ -269,6 +269,10 @@ function sum_key_values(...$arrays): array {
         if (is_array($x)) $res[$index] = array_sum($x);
 
     return $res;
+}
+
+function lsum_key_values(): Closure {
+    return fn(...$arrays) => sum_key_values(...$arrays);
 }
 
 /* update_key_val :: array -> key -> callable/1 -> array */
