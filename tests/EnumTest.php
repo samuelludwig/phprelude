@@ -306,4 +306,17 @@ class EnumTest extends TestCase {
         $expected = [2 => 'dog', 3 => 'orange', 'x' => 'yellow'];
         $this->assertEquals(Enum\merge_preserve_keys($a1, $a2, $a3), $expected);
     }
+
+    public function testSumKeyValues() {
+        $a = ['one' => 10, 'two' => 20];
+        $b = ['one' => 30, 'two' => 60];
+        $both = [$a, $b];
+
+        $expected = ['one' => 40, 'two' => 80];
+        $this->assertEquals($expected, Enum\sum_key_values($a, $b));
+        $this->assertEquals($expected, Enum\sum_key_values(...$both));
+
+        $this->assertEquals($expected, Enum\lsum_key_values()($a, $b));
+        $this->assertEquals($expected, Enum\lsum_key_values()(...$both));
+    }
 }
