@@ -1,8 +1,7 @@
 {
-    "name": "samuelludwig\Phprelude",
+    "name": "samuelludwig\phprelude",
     "description": "The standard library I wish PHP always had",
     "type": "library",
-    "license": "MIT",
     "authors": {
         "name": "Samuel Ludwig",
         "email": "SLudwig.dev@gmail.com"
