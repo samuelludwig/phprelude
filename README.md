@@ -8,8 +8,24 @@ programming in PHP bearable for me and other FP zealots.
 
 ## Usage
 
-You can conveniently require all files in the library by using the
-`autoload.php` file a la
+### Composer
+
+Install via
+
+```bash
+composer install "samuelludwig/phprelude"
+```
+
+And then autoload the library namespaces via the typical
+
+```php
+require_once __DIR__ . '/path/to/vendor/autoload.php';
+```
+
+### Manual Install + Require
+
+If you opt to add the library as a submodule to your project, you can conveniently
+require all files in the library by using the `autoload.php` file a la
 
 ```php
 require_once __DIR__ . '/path/to/Phprelude/autoload.php';
@@ -92,5 +108,3 @@ echo json_encode($user1) . "\n"; // {"id":1,"name":"Mike"}
 - [ ] Clean up overall implementation of structs+types
 - [ ] Add a "strict" version of type-checking for structs, which *doesn't* accept
       extra fields that aren't in the initial struct
-- [ ] Make this library usable as a composer package, in addition to the current
-      method of use
