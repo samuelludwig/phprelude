@@ -118,18 +118,58 @@ function lis_type(string $type_name): Closure {
     return fn($x) => is_type($type_name, $x);
 }
 
-function enforce_type(string $type_name, $x) {
-    if (!is_type($type_name, $x)) {
-        trigger_error(
-            'Incorrect type given, expected type $type_name, instead received: '
-                . json_encode($x, JSON_PRETTY_PRINT),
-            E_USER_ERROR);
-    }
-    return $x;
+/* Trigger an error if first arg is false */
+function enforce_true(
+    bool $t,
+    string $error_message = 'Constraint violated',
+    string $error_type = 'E_USER_ERROR'
+) {
+    if (!$t) trigger_error($error_message, constant($error_type));
+    return $t;
 }
 
-function lenforce_type(string $type_name): Closure {
-    return fn($x) => enforce_type($type_name, $x);
+function lenforce_true(
+    string $error_message = 'Constraint violated',
+    string $error_type = 'E_USER_ERROR'
+): Closure {
+    return fn($x) => enforce_true($x, $error_message, $error_type);
+}
+
+/* Trigger an error if predicate $f returns false when applied to value $x */
+function enforce_constraint(
+    $x,
+    callable $f,
+    string $error_message = 'Constraint violated',
+    string $error_type = 'E_USER_ERROR'
+) {
+    return enforce_true($f($x), $error_message, $error_type);
+}
+
+function lenforce_constraint(
+    callable $f,
+    string $error_message = 'Constraint violated',
+    string $error_type = 'E_USER_ERROR'
+): Closure {
+    return fn($x) => enforce_constraint($x, $f, $error_message, $error_type);
+}
+
+function enforce_type(
+    string $type_name,
+    $x,
+    string $error_type = 'E_USER_ERROR'
+) {
+    $err_msg
+        = "Incorrect type given, expected type $type_name, instead received: "
+            . json_encode($x, JSON_PRETTY_PRINT);
+
+    return enforce_constraint($x, lis_type($type_name), $err_msg, $error_type);
+}
+
+function lenforce_type(
+    string $type_name,
+    string $error_type = 'E_USER_ERROR'
+): Closure {
+    return fn($x) => enforce_type($type_name, $x, $error_type);
 }
 
 /* A struct is an array where the value for each key is a list of valid types. */

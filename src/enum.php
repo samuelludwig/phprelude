@@ -1,6 +1,6 @@
 <?php declare(strict_types=1); namespace Phprelude\Enum;
 require_once __DIR__ . '/core.php';
-use \Phprelude\Core as c;
+use \Phprelude\Core as p;
 use Closure;
 
 /**
@@ -89,7 +89,7 @@ function larray_filter(callable $predicate): Closure {
 
 /* extract_keys_where :: array -> predicate -> array */
 function extract_keys_where(array $a, callable $predicate): array {
-    return c\pipe([
+    return p\pipe([
         larray_filter($predicate),
         larray_keys()
     ])($a);
@@ -104,7 +104,7 @@ function lextract_keys_where(callable $predicate): Closure {
 function locate(array $a, callable $predicate): array {
     $filtered = array_filter($a, $predicate);
 
-    $key = c\pipe([
+    $key = p\pipe([
         larray_keys(),
         lhead()
     ])($filtered);
@@ -122,7 +122,7 @@ function llocate(callable $predicate): Closure {
 
 /* is_assoc:: array -> bool */
 function is_assoc(array $a): bool {
-    $count_of_string_keys_in_array = c\pipe([
+    $count_of_string_keys_in_array = p\pipe([
         larray_keys(),
         lfilter(fn($x) => is_string($x)),
         fn($x) => count($x),
@@ -194,9 +194,9 @@ function lextract_where_key_value_equals($key, $target_value): Closure {
 function element_with_key_value_exists(array $list, $key, $target_value): bool {
     $is_our_element = lcontains_key_value($key, $target_value);
 
-    return c\pipe([
+    return p\pipe([
         lfilter($is_our_element),
-        c\not(lempty())
+        p\not(lempty())
     ])($list);
 }
 
@@ -215,7 +215,7 @@ function get_first_index_where_element_contains_key_value(
 ) {
     $is_our_element = lcontains_key_value($key, $target_value);
 
-    return c\pipe([
+    return p\pipe([
         lfilter($is_our_element),
         larray_keys(),
         lhead()
@@ -346,7 +346,7 @@ function contains_key_vals(array $a, array $key_vals): bool {
         array_key_exists($key_name, $a)
             && ($a[$key_name] === $key_vals[$key_name]);
 
-    return c\pipe([
+    return p\pipe([
         larray_keys(),
         lis_true_for_all_elements($key_value_pair_matches),
     ])($key_vals);
@@ -392,10 +392,22 @@ function lextract_values(array $keys): Closure {
 }
 
 /* extract_values_from_array_into_format :: array -> array -> array
+ * This function accepts two values, a source array, to extract from, and a
+ * mapping of new key-names to keys in the source array. A map of `new-key` to
+ * `source-key` may also involve a transformation of `source-key`'s value; in
+ * which case, `source-key` will be given as an array, the first element being
+ * the key name, and the second being the callable to apply to the value.
  * TODO: make this work recursively (i.e., multiple levels deep)? */
 function extract_values_into_format(array $a, array $key_format): array {
+    p\enforce_constraint(
+        $key_format,
+        lis_assoc(),
+        'Arg 2 expected to be associative array, received '
+            . json_encode($key_format, JSON_PRETTY_PRINT));
     [$format_keys, $source_keys] = split_key_vals($key_format);
-    $source_values = map($source_keys, fn($key) => $a[$key]);
+    $derive_key_value
+        = fn($key) => is_array($key) ? $key[1]($a[$key[0]]) : $a[$key];
+    $source_values = map($source_keys, $derive_key_value);
     return array_combine($format_keys, $source_values);
 }
 
@@ -529,7 +541,7 @@ function lfold($initial, callable $callback): Closure {
 
 /* right-fold */
 function foldr(array $list, $initial, callable $callback) {
-    return c\pipe([
+    return p\pipe([
         larray_reverse(),
         lfold($initial, $callback),
     ])($list);
