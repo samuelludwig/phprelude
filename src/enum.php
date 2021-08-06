@@ -261,6 +261,15 @@ function larray_merge(...$a): Closure {
     return fn($x) => array_merge($x, ...$a);
 }
 
+/* Alias for array_merge */
+function merge(...$a): array {
+    return array_merge(...$a);
+}
+
+function lmerge(...$a): array {
+    return fn($x) => array_merge($x, ...$a);
+}
+
 /* sum_key_values :: Variadic array -> array */
 function sum_key_values(...$arrays): array {
     $res = array_merge_recursive(...$arrays);
