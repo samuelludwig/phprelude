@@ -55,6 +55,15 @@ function lsubstring_exists(string $needle): Closure {
     return fn($s) => substring_exists($s, $needle);
 }
 
+/* Alias for str_replace */
+function replace($subject, $target, $replacement): string {
+    return str_replace($target, $replacement, $subject);
+}
+
+function lreplace($target, $replacement): Closure {
+    return fn($s) => str_replace($target, $replacement, $s);
+}
+
 function lstr_replace($target, $replacement): Closure {
     return fn($s) => str_replace($target, $replacement, $s);
 }
@@ -67,3 +76,19 @@ function lpreg_replace(
     return fn($s) => preg_replace($target_pattern, $replacement, $s, $limit);
 }
 
+/* Aliases for case-coercing functions */
+function to_lower($s): string {
+    return strtolower($s);
+}
+
+function lto_lower(): Closure {
+    return fn($s) => strtolower($s);
+}
+
+function to_upper($s): string {
+    return strtoupper($s);
+}
+
+function lto_upper(): Closure {
+    return fn($s) => strtoupper($s);
+}
