@@ -24,3 +24,16 @@ function print_out($r, $x) {
 function lprint_out($x): Closure {
     return fn($r) => print_out($r, $x);
 }
+
+function log(array $data, $file_handle = STDOUT): array {
+    $timestamp = date('Y-m-d H:i:s');
+    $encoded_data
+        = json_encode(['timestamp' => $timestamp, 'data' => $data]);
+    if (fwrite($file_handle, $encoded_data)) return [ ':ok', $data ];
+    return [ ':error', $data ];
+}
+
+function llog($file_handle = STDOUT): Closure {
+    return fn($x) => log($x, $file_handle);
+}
+

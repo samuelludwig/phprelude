@@ -852,6 +852,20 @@ function lhas_keys(array $key_names): Closure {
     return fn($a) => has_keys($a, $key_names);
 }
 
+/* We accept one key, or an array of keys */
+function remove_keys(array $a, $keys): array {
+    if (is_array($keys)) {
+        foreach ($keys as $k) { unset($a[$k]); }
+        return $a;
+    }
+    unset($a[$keys]); // only one lone key is provided
+    return $a;
+}
+
+function lremove_keys($keys): Closure {
+    return fn($a) => remove_keys($a, $keys);
+}
+
 /* merge_preserve_keys :: Variadic array -> array */
 function merge_preserve_keys(...$arrays): array {
     return foldr($arrays, [], fn($a1, $a2) => $a1 + $a2);
