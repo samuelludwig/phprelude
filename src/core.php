@@ -99,19 +99,30 @@ function is_type(string $type_name, $x): bool {
     }
 
     if (count(explode('array:', $type_name)))
-    return match ($type_name) {
-        'array' => is_array($x),
-        'bool' => is_bool($x),
-        'callable' => is_callable($x),
-        'int' => is_int($x),
-        'float' => is_float($x),
-        'object' => is_object($x),
-        'resource' => is_resource($x),
-        'string' => is_string($x),
-        'null' => is_null($x),
-        'mixed' => true,
-        default => $matches_struct_pattern()
-    };
+    switch ($type_name) {
+        case 'array':
+            return is_array($x);
+        case 'bool':
+            return is_bool($x);
+        case 'callable':
+            return is_callable($x);
+        case 'int':
+            return is_int($x);
+        case 'float':
+            return is_float($x);
+        case 'object':
+            return is_object($x);
+        case 'resource':
+            return is_resource($x);
+        case 'string':
+            return is_string($x);
+        case 'null':
+            return is_null($x);
+        case 'mixed':
+            return true;
+        default:
+            return $matches_struct_pattern();
+    }
 }
 
 function lis_type(string $type_name): Closure {
