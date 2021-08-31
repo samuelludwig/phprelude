@@ -74,5 +74,32 @@ class LensTest extends TestCase {
         $expected = 110;
         $this->assertEquals($expected, $result);
     }
+
+    public function testComposeWithNonTrivialAccessors() {
+        $source =
+            [ 'name' => 'mark'
+            , 'body' => ['height' => ['val' => 100, 'unit' => 'cm'], 'weight' => 86]
+            ];
+        $body = l\mk_lens('body');
+        $height = l\mk_lens('height');
+
+        $unit_get = fn($source) => strtoupper($source['unit']);
+        $unit_set = function ($source, $val) {
+            $source['unit'] = strtolower($val);
+            return $source;
+        };
+        $unit = l\lens($unit_get, $unit_set);
+
+        $h_unit = l\compose($body, $height, $unit);
+
+        $get_unit = l\view($h_unit);
+        $result = $get_unit($source);
+        $expected = 'CM';
+        $this->assertEquals($expected, $result);
+
+        $result = l\set($h_unit, 'IN')($source)['body']['height']['unit'];
+        $expected = 'in';
+        $this->assertEquals($expected, $result);
+    }
 }
 
