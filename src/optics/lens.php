@@ -1,5 +1,7 @@
 <?php declare(strict_types=1); namespace Phprelude\Optics\Lens;
+require_once __DIR__ . '/../core.php';
 require_once __DIR__ . '/../enum.php';
+use \Phprelude\Core as p;
 use \Phprelude\Enum;
 use Closure;
 
@@ -16,6 +18,15 @@ function mk_getter($name): Closure {
 
 function mk_lens($name) {
     return lens(mk_getter($name), mk_setter($name));
+}
+
+/* Works for types and normal assoc arrays */
+function mk_lenses_for(array $type): array {
+    $type_keys = [];
+    foreach ($type as $key => $value) {
+        $type_keys[$key] = $key;
+    }
+    return Enum\map($type_keys, fn($x) => mk_lens($x));
 }
 
 /* TODO: Devise a way to constrain a given lens to a given struct-type */

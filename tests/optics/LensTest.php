@@ -101,5 +101,15 @@ class LensTest extends TestCase {
         $expected = 'in';
         $this->assertEquals($expected, $result);
     }
+
+    public function testMkLensesFor() {
+        $_t = [ 'k1' => [['string']], 'k2' => [['int']] ];
+        $source = ['k1' => 'dog', 'k2' => 5];
+        $t = l\mk_lenses_for($_t);
+        $result = l\view($t['k2'])($source);
+        $expected = 5;
+        $this->assertEquals($expected, $result);
+    }
+
 }
 
