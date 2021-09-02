@@ -266,7 +266,7 @@ function merge(...$a): array {
     return array_merge(...$a);
 }
 
-function lmerge(...$a): array {
+function lmerge(...$a): Closure {
     return fn($x) => array_merge($x, ...$a);
 }
 
@@ -282,6 +282,17 @@ function sum_key_values(...$arrays): array {
 
 function lsum_key_values(): Closure {
     return fn(...$arrays) => sum_key_values(...$arrays);
+}
+
+/* set_key_val :: array -> key -> any -> array */
+function set_key_val(array $a, $key, $val): array {
+    $a[$key] = $val;
+    return $a;
+}
+
+/* lset_key_val :: key -> any -> (array -> array) */
+function lset_key_val($key, $val): Closure {
+    return fn($a) => set_key_val($a, $key, $val);
 }
 
 /* update_key_val :: array -> key -> callable/1 -> array */
