@@ -6,25 +6,25 @@ use \Phprelude\Enum;
 use Closure;
 
 function mk_setter($name): Closure {
-    return function ($source, $val) use ($name) {
-        $source[$name] = $val;
-        return $source;
-    };
+    return fn($source, $val) => Enum\set_key_val($source, $name, $val);
 }
 
 function mk_getter($name): Closure {
     return fn($source) => $source[$name];
 }
 
-function mk_lens($name) {
+function mk_lens($name): array {
     return lens(mk_getter($name), mk_setter($name));
 }
 
-/* Works for types and normal assoc arrays */
+/* Works for types, normal assoc arrays, and number-indexed arrays with unique
+ * string values */
 function mk_lenses_for(array $type): array {
     $type_keys = [];
-    foreach ($type as $key => $value) {
-        $type_keys[$key] = $key;
+    if (Enum\is_assoc($type)) {
+        foreach ($type as $key => $_) { $type_keys[$key] = $key; }
+    } else {
+        foreach ($type as $key) { $type_keys[$key] = $key; }
     }
     return Enum\map($type_keys, fn($x) => mk_lens($x));
 }
@@ -48,7 +48,7 @@ function over($lens, callable $f) {
 }
 
 function compose(...$lenses) {
-    /* Composite is broader then successive iterations */
+    /* Initial composite is broader then successive iterations */
     $composite = Enum\head($lenses);
     foreach (Enum\tail($lenses) as $lens) {
         $composite['get']
@@ -75,3 +75,9 @@ function compose(...$lenses) {
     return $composite;
 }
 
+/**
+ * Invoke view for a list of lenses pertaining to a single source.
+ */
+function view_all(array $lenses): Closure {
+    return fn($source) => Enum\map($lenses, fn($l) => view($l)($source));
+}
