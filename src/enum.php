@@ -906,3 +906,27 @@ function lis_superset_of($b): Closure {
     return fn($a) => is_superset_of($a, $b);
 }
 
+/**
+ * Function that groups an array of associative arrays by some key.
+ *
+ * @param {String} $key Property to sort by.
+ * @param {Array} $data Array that stores multiple associative arrays.
+ */
+function group_by($a, $key) {
+    $result = [];
+
+    foreach($a as $val) {
+        if(array_key_exists($key, $val)){
+            $result[$val[$key]][] = $val;
+        }else{
+            $result[""][] = $val;
+        }
+    }
+
+    return $result;
+}
+
+function lgroup_by($key): array {
+    return fn($a) => group_by($a, $key);
+}
+

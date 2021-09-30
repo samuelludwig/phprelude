@@ -341,4 +341,17 @@ class EnumTest extends TestCase {
         $is_subset_of_b = Enum\lis_subset_of($b);
         $this->assertTrue($is_subset_of_b($a));
     }
+
+    public function testGroupBy() {
+        $a = ['x' => 'one', 'y' => 'one', 'z' => 'one'];
+        $b = ['x' => 'two', 'y' => 'two', 'z' => 'two'];
+        $c = ['x' => 'one', 'y' => 'three', 'z' => 'three'];
+        $d = ['x' => 'one', 'y' => 'one', 'z' => 'four'];
+        $arrays = [$a, $b, $c, $d];
+
+        $grouped_by_x = ['one' => [$a, $c, $d], 'two' => [$b]];
+        //$grouped_by_x_and_y = [[$a, $c, $d], $b];
+
+        $this->assertEquals($grouped_by_x, Enum\group_by($arrays, 'x'));
+    }
 }
