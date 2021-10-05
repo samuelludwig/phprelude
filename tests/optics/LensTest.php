@@ -111,5 +111,23 @@ class LensTest extends TestCase {
         $this->assertEquals($expected, $result);
     }
 
+    public function testComposeAll() {
+        $_t = [ 'type' => [['string']], 'info' => [['k2_t']] ];
+        $_t_info = [ 'name' => [['array']], 'age' => [['int']] ];
+        $_t_info_name = [ 'first' => [['string']], 'last' => [['string']] ];
+        $source =
+            [ 'k1' => 'dog'
+            , 'info' =>
+                [ 'name' => ['first' => 'rob', 'last' => 'smith'], 'age' => 5 ]
+            ];
+        $t = l\mk_lenses_for($_t);
+        $t_info = l\mk_lenses_for($_t_info);
+        $t_info_name = l\mk_lenses_for($_t_info_name);
+        $comped = l\compose_all($t, $t_info, $t_info_name);
+        $result = l\view($comped['info_name_first'])($source);
+        $expected = 'rob';
+        $this->assertEquals($expected, $result);
+    }
+
 }
 

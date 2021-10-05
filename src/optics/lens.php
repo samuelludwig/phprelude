@@ -75,6 +75,31 @@ function compose(...$lenses) {
     return $composite;
 }
 
+/* Given two lists of lenses, create a list of new lenses which is comprised of
+ * the combinatoric compositions of every lens in the original two lists.
+ * Invalid lenses will be created... don't use them. */
+function compose_lists($l1, $l2): array {
+    $lenses = [];
+    foreach ($l2 as $lens_name => $lens) {
+        foreach ($l1 as $prefix_name => $prefix_lens) {
+            $composed_name = implode('_', [$prefix_name, $lens_name]);
+            $lenses[$composed_name] = compose($prefix_lens, $lens);
+        }
+    }
+
+    return $lenses;
+}
+
+function compose_all(...$ls): array {
+    [$head, $lens_array] = Enum\uncons(array_reverse($ls));
+    $composition
+        = Enum\fold(
+            $lens_array, $head, fn($l1, $l2) => compose_lists($l2, $l1));
+
+    return $composition;
+    //$f = ;
+}
+
 /**
  * Invoke view for a list of lenses pertaining to a single source.
  */
