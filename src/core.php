@@ -667,6 +667,21 @@ function pipe(array $callbacks): Closure
 }
 
 /**
+ * Pseudo-alias for pipe, but takes variadic arguments instead of an array, and
+ * begins with the value we want to pipe. 
+ */
+function p($x, ...$callbacks) {
+  return pipe($callbacks)($x);
+}
+
+/**
+ * Pseudo-alias for pipe, but takes variadic arguments instead of an array. 
+ */
+function pl(...$callbacks): Closure {
+  return pipe($callbacks);
+}
+
+/**
  * Pipes callbacks until null is reached,
  * it returns the last non-null value
  *

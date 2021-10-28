@@ -116,14 +116,21 @@ class LensTest extends TestCase {
         $_t_info = [ 'name' => [['array']], 'age' => [['int']] ];
         $_t_info_name = [ 'first' => [['string']], 'last' => [['string']] ];
         $source =
-            [ 'k1' => 'dog'
+            [ 'type' => 'dog'
             , 'info' =>
                 [ 'name' => ['first' => 'rob', 'last' => 'smith'], 'age' => 5 ]
             ];
-        $t = l\mk_lenses_for($_t);
-        $t_info = l\mk_lenses_for($_t_info);
-        $t_info_name = l\mk_lenses_for($_t_info_name);
+        $t = l\mk_lenses_for($_t); // ['type', 'info']
+        $t_info = l\mk_lenses_for($_t_info); // ['name', 'age']
+        $t_info_name = l\mk_lenses_for($_t_info_name); // ['first', 'last']
         $comped = l\compose_all($t, $t_info, $t_info_name);
+        /* [ 'info_name_first' <- (VALID)
+         * , 'info_name_last' <- (VALID)
+         * , 'info_age_first' <- (NOT VALID)
+         * , 'info_age_last' <- (NOT VALID)
+         * , 'type_name_first' <- (NOT VALID)
+         * , ... <- (ALL OTHER POSSIBLE COMBINATIONS ARE NOT VALID)
+         * ] */
         $result = l\view($comped['info_name_first'])($source);
         $expected = 'rob';
         $this->assertEquals($expected, $result);
