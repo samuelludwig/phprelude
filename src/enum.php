@@ -926,7 +926,35 @@ function group_by($a, $key) {
     return $result;
 }
 
-function lgroup_by($key): array {
+function lgroup_by($key): Closure {
     return fn($a) => group_by($a, $key);
 }
 
+function zip_as_field(
+    array $host,
+    array $data,
+    string $field_name
+): array {
+    $length = min(count($host), count($data));
+    return p\p(
+        $host, 
+        Enum\ltake($length), 
+        Enum\lmap(fn($x) => is_array($x) ? $x : [$x]),
+        Enum\lmap_with_index(
+            fn($index, $a) => Enum\set_key_val($a, $field_name, $data[$index])
+        )
+    );
+}
+
+/** 
+ * Zips together two arrays, the $host, and $data, where zipped $data elements
+ * are appended to the corresponding $host element as under the $field_name key.
+ *
+ * The zipping finishes as soon as any enumerable in the given collection
+ * completes.
+ *
+ * Turns elements into an array if they aren't already.
+ */
+function lzip_as_field(array $data, string $field_name): Closure {
+  return fn($a) => zip_as_field($a, $data, $field_name);
+}

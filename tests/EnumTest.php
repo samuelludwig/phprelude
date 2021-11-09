@@ -354,4 +354,40 @@ class EnumTest extends TestCase {
 
         $this->assertEquals($grouped_by_x, Enum\group_by($arrays, 'x'));
     }
+
+    public function test_zip_as_field()
+    {
+        $f = fn($h, $d, $f) => Core\zip_as_field($h, $d, $f);
+
+        $host = [];
+        $data = [];
+        $field = "name";
+        $result = $f($host, $data, $field);
+        $expected = [];
+        $this->assertEquals($expected, $result);
+
+        $host = ['a'];
+        $data = ['b'];
+        $field = "name";
+        $result = $f($host, $data, $field);
+        $expected = [ [0 => 'a', 'name' => 'b'] ];
+        $this->assertEquals($expected, $result);
+
+        $host = [ ['first' => 'john'], ['first' => 'bill'] ];
+        $data = [ 'smith', 'robertson', 'andrews' ];
+        $field = "last";
+        $result = $f($host, $data, $field);
+        $expected = [ 
+            ['first' => 'john', 'last' => 'smith'], 
+            ['first' => 'bill', 'last' => 'robertson'],
+        ];
+        $this->assertEquals($expected, $result);
+
+        $host = [];
+        $data = [ 'smith', 'robertson', 'andrews' ];
+        $field = "last";
+        $result = $f($host, $data, $field);
+        $expected = [];
+        $this->assertEquals($expected, $result);
+    }
 }
