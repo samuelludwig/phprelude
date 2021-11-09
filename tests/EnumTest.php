@@ -355,9 +355,9 @@ class EnumTest extends TestCase {
         $this->assertEquals($grouped_by_x, Enum\group_by($arrays, 'x'));
     }
 
-    public function test_zip_as_field()
+    public function testZipAsField()
     {
-        $f = fn($h, $d, $f) => Core\zip_as_field($h, $d, $f);
+        $f = fn($h, $d, $f) => Enum\zip_as_field($h, $d, $f);
 
         $host = [];
         $data = [];
@@ -388,6 +388,44 @@ class EnumTest extends TestCase {
         $field = "last";
         $result = $f($host, $data, $field);
         $expected = [];
+        $this->assertEquals($expected, $result);
+    }
+
+    public function testPartition()
+    {
+        $f = fn($a, $p) => Enum\partition($a, $p);
+
+        $empty_list = [];
+        $result = $f($empty_list, 0);
+        $expected = [];
+        $this->assertEquals($expected, $result);
+        $result = $f($empty_list, 3);
+        $expected = [];
+        $this->assertEquals($expected, $result);
+
+        $single_item_list = [ 'a' ];
+        $result = $f($single_item_list, 3);
+        $expected = [ ['a'] ];
+        $this->assertEquals($expected, $result);
+
+        $two_item_list = [ 'a', 'b' ];
+        $expected = [ ['a'], ['b'] ];
+        $result = $f($two_item_list, 2);
+        $this->assertEquals($expected, $result);
+        $result = $f($two_item_list, 3);
+        $this->assertEquals($expected, $result);
+
+        $list = [ 'a', 'b', 'c', 'd', 'e' ];
+        $result = $f($list, 1);
+        $expected = [ [ 'a', 'b', 'c', 'd', 'e' ] ];
+        $this->assertEquals($expected, $result);
+        $result = $f($list, 3);
+        $expected = [ ['a', 'b'], ['c', 'd'], ['e'] ];
+        $this->assertEquals($expected, $result);
+
+        $list = [ 'a', 'b', 'd', 'e' ];
+        $result = $f($list, 3);
+        $expected = [ ['a', 'b'], ['d'], ['e'] ];
         $this->assertEquals($expected, $result);
     }
 }

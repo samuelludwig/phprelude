@@ -49,7 +49,10 @@ function larray_diffr(array $a): Closure {
 }
 
 /**
- * 
+ * Splits $list into $p equal-sized arrays (or as close to equal as possible:
+ * the last arrays may be a smaller size relative to others as the list may not
+ * split evenly) of $list's elements.
+ *
  * @param array $list
  * @param int $p
  * @return multitype:multitype:
@@ -58,6 +61,7 @@ function larray_diffr(array $a): Closure {
 function partition(array $list, int $p): array {
     if ($p < 1) return [];
     $listlen = count($list);
+    if ($p >= $listlen) return map($list, fn($x) => [$x]);
     $partlen = (int) floor($listlen / $p);
     if ($listlen === 0 || $partlen === 0) return [];
     $partrem = $listlen % $p;
