@@ -49,6 +49,31 @@ function larray_diffr(array $a): Closure {
 }
 
 /**
+ * 
+ * @param array $list
+ * @param int $p
+ * @return multitype:multitype:
+ * @link http://www.php.net/manual/en/function.array-chunk.php#75022
+ */
+function partition(array $list, int $p): array {
+    $listlen = count($list);
+    $partlen = (int) floor($listlen / $p);
+    $partrem = $listlen % $p;
+    $partition = array();
+    $mark = 0;
+    for($px = 0; $px < $p; $px ++) {
+        $incr = ($px < $partrem) ? $partlen + 1 : $partlen;
+        $partition[$px] = array_slice($list, $mark, $incr);
+        $mark += $incr;
+    }
+    return $partition;
+}
+
+function lpartition(int $p): Closure {
+  return fn($a) => partition($a, $p);
+}
+
+/**
  * Rotates array values to the left, does not preserve indicies or keys.
  *
  * rotate_array :: array -> array */
