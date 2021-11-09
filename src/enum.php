@@ -531,7 +531,7 @@ function map_with_index(array $a, callable $f): array {
 
 /* lmap_with_index :: callable -> (array -> array) */
 function lmap_with_index(callable $f): Closure {
-    return fn($a) => each($a, $f);
+    return fn($a) => map_with_index($a, $f);
 }
 
 /**
