@@ -56,8 +56,10 @@ function larray_diffr(array $a): Closure {
  * @link http://www.php.net/manual/en/function.array-chunk.php#75022
  */
 function partition(array $list, int $p): array {
+    if ($p < 1) return [];
     $listlen = count($list);
     $partlen = (int) floor($listlen / $p);
+    if ($listlen === 0 || $partlen === 0) return [];
     $partrem = $listlen % $p;
     $partition = array();
     $mark = 0;
