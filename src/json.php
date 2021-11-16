@@ -1,18 +1,18 @@
 <?php declare(strict_types=1); namespace Phprelude\Json;
 require_once __DIR__ . '/core.php';
 require_once __DIR__ . '/file.php';
-use \Phprelude\Core;
+use \Phprelude\Core as p;
 use \Phprelude\File;
 use Closure;
 
 /* decode :: string -> array */
 function decode(string $x): array {
-    return json_decode($x, true);
+    return p\p($x, lstrip_comments(), fn($x) => json_decode($x, true));
 }
 
 /* ldecode :: () -> (string -> array) */
 function ldecode(): Closure {
-    return fn($x) => json_decode($x, true);
+    return fn($x) => decode($x);
 }
 
 /* lencode :: Optional bool -> (array -> string) */
@@ -33,8 +33,22 @@ function lencode($pretty_print = false): Closure {
 
 /* json_file_to_array :: string -> array */
 function json_file_to_array(string $file_location): array {
-    return Core\pipe([
+    return p\p(
+        $file_location,
         File\lfile_get_contents(),
-        ldecode()
-    ])($file_location);
+        ldecode());
+}
+
+/**
+ * Lets us parse JSONC as well, strips comments and outputs plain JSON.
+ */
+/* strip_comments :: string -> string */
+function strip_comments(string $x): string {
+    return preg_replace('~
+        (" (?:\\\\. | [^"])*+ ") | \# [^\v]*+ | // [^\v]*+ | /\* .*? \*/
+    ~xs', '$1', $x);
+}
+
+function lstrip_comments(): Closure {
+    return fn($x) => strip_comments($x);
 }
