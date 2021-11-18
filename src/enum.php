@@ -80,6 +80,25 @@ function lpartition(int $p): Closure {
 }
 
 /**
+ * Shuffles the order of elements in a sequential array.
+ * Doesn't shuffle in-place.
+ * shuf :: array -> array
+ */
+function shuf(array $a): array {
+  if (count($a) < 2) return $a;
+  $a_prime = $a;
+  /* We want to make sure we don't end up with the same ordering */
+  while ($a_prime == $a) {
+    shuffle($a_prime);
+  }
+  return $a_prime;
+}
+
+function lshuf(): Closure {
+  return fn($a) => shuf($a);
+}
+
+/**
  * Rotates array values to the left, does not preserve indicies or keys.
  *
  * rotate_array :: array -> array */
